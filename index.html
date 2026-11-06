@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#f4f8f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — 軌道を、組み立てろ。</title>
+<title>LASER CUBE — 立体を、見抜け。</title>
 <style>
 :root{--paper:#f4f8f7;--ink:#16383e;--light:#809996;--mint:#109b92;--aqua:#55c7ba;--gold:#c79b62;--line:#dce9e5;--white:#fff;--shadow:0 13px 38px rgba(29,67,67,.075)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -55,6 +55,28 @@ button:active{transform:scale(.97)}button:disabled{opacity:.27;cursor:default}
 .tip{min-height:17px;text-align:center;font-size:10px;color:#91a9a5;line-height:1.4}
 @media(max-height:660px){.app{gap:6px;padding-top:calc(env(safe-area-inset-top) + 6px);padding-bottom:calc(env(safe-area-inset-bottom) + 6px)}.stage h1{font-size:17px;margin-top:6px}.desc{margin-top:3px}.gun{min-height:75px;padding:5px 3px}.gunsymbol{height:18px}.gunlabel{font-size:10px}.actions{min-height:49px}.panel{gap:7px}.gunstate{font-size:9px}.board{min-height:220px}}
 @media(max-width:345px){.gun{gap:2px;padding:5px 2px}.gunhead .gunletter{font-size:11px}.gunlabel{font-size:10px}.gunstate{font-size:8px}.app{padding-left:10px;padding-right:10px}.logo{font-size:16px}}
+
+/* V4: controls live WITH the 3D puzzle, never in a detached loadout row. */
+.tip{display:none}
+.board{isolation:isolate}
+.hud{z-index:2}
+.weaponHint{top:40px;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap;max-width:96%;border-radius:13px;padding:6px 11px;font-size:11px;z-index:4;box-shadow:0 5px 16px rgba(24,68,63,.055)}
+.boardnote{bottom:83px;font-size:10px;opacity:.8;z-index:2}
+.gunrow{position:absolute;left:9px;right:9px;bottom:9px;display:grid;grid-template-columns:repeat(var(--shots,3),minmax(0,1fr));gap:6px;z-index:5;pointer-events:auto}
+.gun{height:58px;min-height:0;border-radius:13px;padding:5px 3px;gap:0;justify-content:center;background:rgba(255,255,255,.94);border:1px solid #dfeae6;box-shadow:0 2px 8px rgba(35,88,79,.045);backdrop-filter:blur(9px)}
+.gun.selected{border:2px solid #159b92;padding:4px 2px;background:rgba(243,255,251,.97)}
+.gun.isShot.selected{border-color:#c89661;background:#fffbf5}
+.gunhead{font-size:10px;gap:4px;line-height:1.2}
+.gunhead .gunletter{font-size:13px;color:#315a58}
+.gun.isShot .gunhead .gunletter{color:#9f7049}
+.gunorder{font-size:9px;right:6px;top:4px}
+.gunsymbol{width:48px;height:16px;max-width:90%;margin-top:0}
+.gunlabel,.gunstate{display:none}
+.gunpin{left:6px;top:7px}
+.panel{gap:5px}
+.tip{font-size:10px;min-height:15px}
+@media(max-height:660px){.gunrow{bottom:5px}.gun{height:44px;min-height:0;padding:3px 2px}.gun.selected{padding:2px 1px}.gunsymbol{width:40px;height:13px}.boardnote{bottom:54px}.weaponHint{top:33px;font-size:10px;padding:4px 8px}}
+@media(max-width:345px){.gunrow{gap:4px;left:5px;right:5px}.gun{padding:4px 1px}.gunhead .gunletter{font-size:11px}.gunhead{font-size:9px}.weaponHint{font-size:10px}}
 </style>
 </head>
 <body><main class="app">
@@ -65,10 +87,10 @@ button:active{transform:scale(.97)}button:disabled{opacity:.27;cursor:default}
   <section class="stage"><div class="strap"><span id="chapter">CHAPTER 01 · つらぬく</span><div class="stagenav"><button class="navbtn" id="prev" aria-label="前の問題">‹</button><span id="stageNum">01 / 12</span><button class="navbtn" id="nextStage" aria-label="次の問題">›</button></div></div><div class="progress"><i id="progress"></i></div><h1 id="title">奥まで一直線</h1><p class="desc" id="desc">面の照準を選んで、射線を組み立てる。</p></section>
   <section class="board" id="board" aria-label="3Dキューブの射撃パズル"><canvas id="cube"></canvas>
     <div class="hud"><div class="hudpiece"><i class="dot"></i><span id="blueCount">3</span></div><div class="hudpiece" id="purpleHud" style="display:none"><i class="dot purple"></i><span id="purpleCount">1 × 2</span></div><div class="hudpiece"><i class="dot gold"></i><span id="goldCount">4</span></div></div>
-    <div class="weaponHint" id="weaponHint" aria-live="polite"></div><div class="result" id="result"><strong id="resultTitle">CLEAR!</strong><small id="resultSub">すべての青に命中</small></div>
-    <div class="boardnote" id="boardnote">面の小さな照準を選ぶ · 余白をドラッグで回転</div>
+    <div class="weaponHint" id="weaponHint" aria-live="polite"></div><div class="gunrow" id="guns" aria-label="射撃の順番と武器"></div><div class="result" id="result"><strong id="resultTitle">CLEAR!</strong><small id="resultSub">すべての青に命中</small></div>
+    <div class="boardnote" id="boardnote">丸をタップで照準 · 立体をドラッグで回転</div>
   </section>
-  <section class="panel"><div class="gunrow" id="guns"></div><div class="actions"><button class="smallbtn" id="hint">ヒント</button><button class="firebtn" id="fire" disabled>照準を合わせよう</button></div><div class="tip" id="tip">順番を想像して、すべての狙いをセットしよう。</div></section>
+  <section class="panel"><div class="actions"><button class="smallbtn" id="hint">ヒント</button><button class="firebtn" id="fire" disabled>照準を合わせよう</button></div><div class="tip" id="tip">順番を想像して、すべての狙いをセットしよう。</div></section>
 </main>
 <script>
 'use strict';
@@ -79,7 +101,21 @@ const $=id=>document.getElementById(id);
 const board=$('board'), canvas=$('cube'),ctx=canvas.getContext('2d',{alpha:true});
 let W=0,H=0,DPR=1,scale=46, cx=0,cy=0;
 const defaultYaw=.72, defaultPitch=.65;
-let yaw=defaultYaw,pitch=defaultPitch,viewTarget=null;
+let camR=[0,1,0],camU=[0,0,1],camF=[1,0,0],viewTarget=null;
+const vdot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const vcross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const vnorm=a=>{const d=Math.hypot(...a)||1;return a.map(x=>x/d)};
+const vrot=(v,axis,theta)=>{const c=Math.cos(theta),s=Math.sin(theta),dot=vdot(v,axis),cross=vcross(axis,v);return v.map((x,i)=>x*c+cross[i]*s+axis[i]*dot*(1-c))};
+function standardCamera(){const yaw=defaultYaw,pitch=defaultPitch,c=Math.cos(pitch),s=Math.sin(pitch),cy=Math.cos(yaw),sy=Math.sin(yaw);
+ return {r:[-sy,cy,0],u:[-s*cy,-s*sy,c],f:[c*cy,c*sy,s]}}
+function setCameraDefault(){const o=standardCamera();camR=o.r;camU=o.u;camF=o.f;viewTarget=null}
+function straightenCamera(){camF=vnorm(camF);camR=vnorm(vcross(camU,camF));camU=vnorm(vcross(camF,camR))}
+function orbitCamera(dx,dy){viewTarget=null;const ay=-dx*.010,ax=dy*.010;
+ const pivotU=camU.slice();camR=vrot(camR,pivotU,ay);camF=vrot(camF,pivotU,ay);
+ const pivotR=camR.slice();camU=vrot(camU,pivotR,ax);camF=vrot(camF,pivotR,ax);straightenCamera()}
+function focusVisible(){const axis=getLevel().weapons[activeGun]?.axis;if(!axis)return;const i=AXES.indexOf(axis);
+ if(camF[i]<.18)viewTarget=standardCamera()}
+setCameraDefault();
 let stageIndex=0,highest=0,soundOn=true, audio=null, won=false, fired=false,resolved=false,fireTime=0,fireReport=null,hintIndex=-1,tries=0,serial=0;
 let chosen=[],hitPorts=[],pointer=null,particles=[],laserFlash=0,frame=0,activeGun=0;
 const storeKey='LASER_CUBE_M03';
@@ -102,8 +138,8 @@ function tick(){playingTone(587.33,.035,'sine',.022)}
 function fireSound(w){playingTone(w.type==='shot'?392:523.25,w.type==='shot'?.065:.095,'sine',.031)}
 function winSound(){[[523.25,0],[659.26,.13],[783.99,.26]].forEach(([f,t])=>playingTone(f,.105,'sine',.034,t))}
 function failSound(){playingTone(329.63,.075,'sine',.026)}
-function viewDir(){const c=Math.cos(pitch);return [Math.cos(yaw)*c,Math.sin(yaw)*c,Math.sin(pitch)]}
-function proj(p){const sz=scale,s=Math.sin(yaw),c=Math.cos(yaw),sp=Math.sin(pitch),cp=Math.cos(pitch);return {x:cx+(-s*p[0]+c*p[1])*sz,y:cy+(sp*(c*p[0]+s*p[1])-cp*p[2])*sz,d:Math.cos(pitch)*(c*p[0]+s*p[1])+Math.sin(pitch)*p[2]}}
+function viewDir(){return camF}
+function proj(p){return {x:cx+vdot(camR,p)*scale,y:cy-vdot(camU,p)*scale,d:vdot(camF,p)}}
 function line(a,b,color,width=1,alpha=1,dash=[]){ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
 function poly(points,fill,stroke,width=1,alpha=1){ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
 function dot(p,r,color,alpha=1,stroke){ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);if(color){ctx.fillStyle=color;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.1;ctx.stroke()}ctx.restore()}
@@ -144,7 +180,7 @@ function evaluate(level,aims){
  const missed=[...blocks].filter(([,b])=>b.kind!=='gold').map(([key])=>key);
  return {ok:!missed.length&&!hurt.length,broken,hurt,missed,steps,snapshots};
 }
-function resize(){const r=board.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);DPR=Math.min(window.devicePixelRatio||1,2.5);canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);canvas.style.width=W+'px';canvas.style.height=H+'px';const d=dims();scale=Math.min(W/6.6,H/Math.max(6.0,d[2]*1.45+2.1),60);cx=W*.5;cy=H*.515}
+function resize(){const r=board.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);DPR=Math.min(window.devicePixelRatio||1,2.5);canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);canvas.style.width=W+'px';canvas.style.height=H+'px';const d=dims();scale=Math.min(W/Math.max(5.9,(d[0]+d[1])*.83+1.0),H/Math.max(5.8,d[2]*1.45+1.9),68);cx=W*.5;cy=H*.48}
 function cubeFaces(c,kind,removed=false,hp=2){const [x,y,z]=c, r=.455,dir=viewDir();const vertex=(a,b,d)=>proj([x+a*r,y+b*r,z+d*r]);const faceDefinitions=[{normal:[1,0,0],p:[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]],shade:2},{normal:[0,1,0],p:[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],shade:1},{normal:[0,0,1],p:[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],shade:0},{normal:[-1,0,0],p:[[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]],shade:2},{normal:[0,-1,0],p:[[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]],shade:1},{normal:[0,0,-1],p:[[-1,1,-1],[1,1,-1],[1,-1,-1],[-1,-1,-1]],shade:3}];
  const colors={blue:['#9cece4','#4cc8be','#23a99f','#177f81'],purple:['#d0bfee','#aa93d6','#8870bc','#655d91'],gold:['#f4e8d7','#ead3b7','#d7b58c','#bea080']};const cc=colors[kind];
  for(const f of faceDefinitions){if(f.normal.reduce((sum,a,i)=>sum+a*dir[i],0)<.04)continue;const ps=f.p.map(p=>vertex(...p));poly(ps,cc[f.shade],kind==='gold'?'#ae987a':kind==='purple'?'#9989bb':'#56aaa6',.9,removed?.15:.94)}
@@ -213,7 +249,12 @@ function drawAxisLabel(){/* axis is displayed on the weapon card, not floating a
 function drawParticles(dt){for(const o of particles){o.x+=o.vx*dt;o.y+=o.vy*dt;o.vy+=40*dt;o.life-=dt;ctx.save();ctx.globalAlpha=Math.min(1,o.life*2.1);ctx.fillStyle=o.color;ctx.beginPath();ctx.arc(o.x,o.y,Math.max(.5,o.size*o.life),0,7);ctx.fill();ctx.restore()}particles=particles.filter(p=>p.life>0)}
 function render(now){frame=requestAnimationFrame(render);if(!W||!H)return;
  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
- if(viewTarget){yaw=lerp(yaw,viewTarget[0],.16);pitch=lerp(pitch,viewTarget[1],.16);if(Math.abs(yaw-viewTarget[0])+Math.abs(pitch-viewTarget[1])<.003){yaw=viewTarget[0];pitch=viewTarget[1];viewTarget=null}}
+ if(viewTarget){const target=viewTarget, mix=.16;
+  camR=camR.map((v,i)=>v*(1-mix)+target.r[i]*mix);
+  camU=camU.map((v,i)=>v*(1-mix)+target.u[i]*mix);
+  camF=camF.map((v,i)=>v*(1-mix)+target.f[i]*mix);
+  straightenCamera();if(vdot(camF,target.f)>.9997&&vdot(camU,target.u)>.9997){camR=target.r.slice();camU=target.u.slice();camF=target.f.slice();viewTarget=null}
+ }
  drawShadow();drawWire();
  const level=getLevel(),phase=phaseTime(now);
  const data=(fired&&fireReport?fireReport.snapshots[phase.visible]:[
@@ -237,22 +278,22 @@ function ui(){const l=getLevel();
  $('guns').style.setProperty('--shots',String(l.weapons.length));
  $('guns').innerHTML=l.weapons.map((w,i)=>{const hasAim=chosen[i]>=0,active=i===activeGun,laser=w.type==='laser';
  return `<button type="button" data-wi="${i}" ${fired?'disabled':''} class="gun ${laser?'isLaser':'isShot'} ${hasAim?'active':''} ${active?'selected':''}" aria-label="${i+1}手目 ${w.axis.toUpperCase()}方向 ${laser?'レーザー貫通':'ショット手前だけ'}">
- <span class="gunorder">${i+1}</span><span class="gunpin"></span><span class="gunhead"><span class="gunletter">${w.axis.toUpperCase()}</span><span>${laser?'LASER':'SHOT'}</span></span>
- ${weaponGlyph(w.type)}<span class="gunlabel">${laser?'全部つらぬく':'手前の1個'}</span><span class="gunstate">${hasAim?'✓ 設定済み':active?'面で選ぶ':'未設定'}</span></button>`}).join('');
+ <span class="gunorder">${hasAim?'✓':i+1}</span><span class="gunpin"></span><span class="gunhead"><span class="gunletter">${w.axis.toUpperCase()}</span><span>${laser?'LASER':'SHOT'}</span></span>
+ ${weaponGlyph(w.type)}<span class="gunlabel">${laser?'全部つらぬく':'手前の1個'}</span><span class="gunstate">${hasAim?'✓ 設定済み':active?'丸をタップ':'未設定'}</span></button>`}).join('');
  const current=l.weapons[activeGun]||l.weapons[0],laser=current.type==='laser',msg=laser?'一列すべて貫通':'最初のブロックだけ';
- $('weaponHint').textContent=(activeGun+1)+'手目 '+current.axis.toUpperCase()+' ｜ '+msg;
+ $('weaponHint').textContent=(activeGun+1)+'発目   '+current.axis.toUpperCase()+'軸  '+(laser?'◆ LASER · 全部貫通':'● SHOT · 手前1個');
  $('weaponHint').classList.toggle('shot',!laser);
  $('fire').disabled=(!won&&!fired&&chosen.some(i=>i<0));$('fire').classList.toggle('next',won);
  $('fire').textContent=won?(stageIndex===LEVELS.length-1?'全'+LEVELS.length+'問クリア！ ↻':'次のステージ →'):fired?resolved?'照準を直す':'発射中…':chosen.every(i=>i>=0)?l.weapons.length+'発を実行  ·  FIRE':'照準を合わせよう';
  $('boardnote').style.opacity=fired?0:1;
- $('tip').textContent=won?'全部、狙い通り！ 次へ進もう。':fired?resolved?'結果を確認して、照準を直そう。':'順番に撃ち込み中…':hintIndex>=0?'ヒント：この照準は正しい。':laser?'青い光は、奥まで全ブロックを貫通':'オレンジの弾は、最初のブロックで止まる';
+ $('tip').textContent=won?'思いどおり！ 次の問題へ。':fired?resolved?'照準を変えて、もう一度。':'射撃中…':hintIndex>=0?'ヒントをセットしました。':'立体をドラッグで360°回転 · 丸をタップで照準';
  $('hint').textContent=hintIndex>=0?'ヒント表示中':'ヒント';$('hint').disabled=won||fired;
  $('result').classList.toggle('visible',resolved);$('result').classList.toggle('fail',resolved&&!won);
  if(resolved){$('resultTitle').textContent=won?(stageIndex===LEVELS.length-1?'ALL CLEAR!':'CLEAR!'):fireReport.hurt.length?'金色に命中！':'青が残った';
  $('resultSub').textContent=won?'計算通り。すべてを消した。':fireReport.hurt.length?'金色を避けられる順番を考えよう':'あと '+fireReport.missed.length+' 個、消せなかった';}
  $('desc').textContent=l.purple.length?'青は1発、紫は2発。金色は守る。':l.weapons.some(w=>w.type==='shot')?'緑は貫通、オレンジは手前だけ。順番がカギ。':'すべての青を消して、金色は守ろう。';
 }
-function show(i){serial++;stageIndex=Math.max(0,Math.min(LEVELS.length-1,i));yaw=defaultYaw;pitch=defaultPitch;viewTarget=null;
+function show(i){serial++;stageIndex=Math.max(0,Math.min(LEVELS.length-1,i));setCameraDefault();
  chosen=getLevel().weapons.map(()=>-1);activeGun=0;won=false;fired=false;resolved=false;fireReport=null;hintIndex=-1;tries=0;particles=[];ui();resize();save()}
 function shoot(){if(won){if(stageIndex<LEVELS.length-1)show(stageIndex+1);else show(0);tick();return}
  if(fired){if(!resolved)return;fired=false;resolved=false;fireReport=null;hintIndex=-1;ui();tick();return}
@@ -266,30 +307,36 @@ function shoot(){if(won){if(stageIndex<LEVELS.length-1)show(stageIndex+1);else s
  },i*STEP_MS+220);
  setTimeout(()=>{if(!fired||run!==serial)return;resolved=true;if(fireReport.ok){won=true;highest=Math.max(highest,Math.min(LEVELS.length-1,stageIndex+1));save();winSound()}else failSound();ui()},l.weapons.length*STEP_MS+240);
 }
-function hint(){if(fired||won)return;hintIndex=activeGun;const i=hintIndex,solution=getLevel().solution[i];chosen[i]=solution;const next=chosen.findIndex((v,j)=>v<0&&j!==i);if(next>=0)activeGun=next;tick();ui();}
-function resetView(){viewTarget=[defaultYaw,defaultPitch];tick()}
+function hint(){if(fired||won)return;hintIndex=activeGun;const i=hintIndex,solution=getLevel().solution[i];chosen[i]=solution;const next=chosen.findIndex((v,j)=>v<0&&j!==i);if(next>=0){activeGun=next;focusVisible()}tick();ui();}
+function resetView(){viewTarget=standardCamera();tick()}
 function nearestPort(x,y,maxRadius=24){let nearest=null,dist=999;for(const p of hitPorts){const n=Math.hypot(p.x-x,p.y-y);if(n<dist&&n<maxRadius){nearest=p;dist=n}}return nearest}
 function chooseAt(x,y,advance=true,radius=24){const nearest=nearestPort(x,y,radius);
  if(nearest&&!fired){const changed=chosen[nearest.wIndex]!==nearest.j;chosen[nearest.wIndex]=nearest.j;hintIndex=-1;
-  if(advance){const next=chosen.findIndex((v,j)=>v<0&&j!==nearest.wIndex);if(next>=0)activeGun=next}
+  if(advance){const next=chosen.findIndex((v,j)=>v<0&&j!==nearest.wIndex);if(next>=0){activeGun=next;focusVisible()}}
   if(changed)tick();ui();return true;}return false;}
-canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect(),p=nearestPort(e.clientX-r.left,e.clientY-r.top,22);
- pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false,mode:p&&!fired?'aim':'rotate'};
- canvas.setPointerCapture(e.pointerId);if(pointer.mode==='aim')chooseAt(e.clientX-r.left,e.clientY-r.top,false,22);});
-canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;
- pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>8)pointer.moved=true;
- if(pointer.mode==='aim'){const r=canvas.getBoundingClientRect();chooseAt(e.clientX-r.left,e.clientY-r.top,false,Math.max(25,scale*.72));return;}
- if(pointer.moved){viewTarget=null;yaw+=dx*.010;pitch=Math.max(.19,Math.min(1.24,pitch-dy*.0078));}});
-canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;
- if(pointer.mode==='aim'||!pointer.moved){const r=canvas.getBoundingClientRect();chooseAt(e.clientX-r.left,e.clientY-r.top,true,Math.max(25,scale*.72))}
- pointer=null;});
+canvas.addEventListener('pointerdown',e=>{
+ pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};
+ canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove',e=>{
+ if(!pointer||pointer.id!==e.pointerId)return;
+ const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;
+ pointer.px=e.clientX;pointer.py=e.clientY;
+ if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>6)pointer.moved=true;
+ if(pointer.moved)orbitCamera(dx,dy);
+});
+canvas.addEventListener('pointerup',e=>{
+ if(!pointer||pointer.id!==e.pointerId)return;
+ if(!pointer.moved){const r=canvas.getBoundingClientRect();chooseAt(e.clientX-r.left,e.clientY-r.top,true,Math.max(17,scale*.36))}
+ pointer=null;
+});
 canvas.addEventListener('pointercancel',()=>pointer=null);
-$('guns').addEventListener('click',e=>{const b=e.target.closest('button[data-wi]');if(!b||fired)return;const i=Number(b.dataset.wi);if(i>=0){activeGun=i;const a=AXES.indexOf(getLevel().weapons[i].axis);if(viewDir()[a]<.16)viewTarget=[defaultYaw,defaultPitch];tick();ui()}});$('fire').addEventListener('click',shoot);$('hint').addEventListener('click',hint);$('homeView').addEventListener('click',resetView);$('prev').addEventListener('click',()=>{if(fired&&!resolved)return;if(stageIndex>0){show(stageIndex-1);tick()}});$('nextStage').addEventListener('click',()=>{if(fired&&!resolved)return;if(stageIndex<highest){show(stageIndex+1);tick()}});
+$('guns').addEventListener('click',e=>{const b=e.target.closest('button[data-wi]');if(!b||fired)return;const i=Number(b.dataset.wi);if(i>=0){activeGun=i;const a=AXES.indexOf(getLevel().weapons[i].axis);focusVisible();tick();ui()}});$('fire').addEventListener('click',shoot);$('hint').addEventListener('click',hint);$('homeView').addEventListener('click',resetView);$('prev').addEventListener('click',()=>{if(fired&&!resolved)return;if(stageIndex>0){show(stageIndex-1);tick()}});$('nextStage').addEventListener('click',()=>{if(fired&&!resolved)return;if(stageIndex<highest){show(stageIndex+1);tick()}});
 function soundUi(){$('soundBtn').style.color=soundOn?'#448b85':'#afbbb7';$('soundBtn').setAttribute('aria-pressed',String(soundOn))}
 $('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;soundUi();save();tick()});soundUi();
 window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(board);
 show(stageIndex);resize();requestAnimationFrame(render);
-window.LASER_CUBE={LEVELS,show,evaluate,get chosen(){return chosen},setChosen(a){chosen=a.slice();ui()},shoot,get ports(){return hitPorts.map(p=>({x:p.x,y:p.y,wIndex:p.wIndex,j:p.j}))},get stage(){return stageIndex},get result(){return fireReport}};
+window.LASER_CUBE={LEVELS,show,evaluate,get chosen(){return chosen},setChosen(a){chosen=a.slice();ui()},shoot,get ports(){return hitPorts.map(p=>({x:p.x,y:p.y,wIndex:p.wIndex,j:p.j}))},get stage(){return stageIndex},get result(){return fireReport},get camera(){return {r:camR.slice(),u:camU.slice(),f:camF.slice()}},orbit:orbitCamera,focus:focusVisible};
 })();
 </script>
 </body></html>
