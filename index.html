@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#f6f9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — 方向は、あなたが決める</title>
+<title>LASER CUBE — FEEL THE HIT</title>
 <style>
 :root{--bg:#f6f9f7;--ink:#193b3d;--mute:#789391;--mint:#159b91;--mint-light:#d7f5ed;--warm:#c7864a;--line:#dce9e5;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -28,6 +28,12 @@ button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visibl
 .weapon.selected{border-color:#48bbaa;background:rgba(242,255,252,.97);box-shadow:0 0 0 1px rgba(30,162,148,.16),0 6px 15px rgba(24,128,113,.07)}
 .weapon.selected.shot{border-color:#d6a66d;background:rgba(255,249,240,.96);box-shadow:0 0 0 1px rgba(197,145,86,.13)}
 .weapon.done{background:rgba(248,251,250,.75)}
+.weapon:active{transform:scale(.97)}.weapon{transition:transform .10s ease,border-color .13s,background .13s,box-shadow .13s}
+.weapon.selected .weapon-num{color:#268c81}.weapon.selected.shot .weapon-num{color:#b77b45}
+.fire{position:relative;overflow:hidden}.fire:not(:disabled):active{filter:brightness(1.09)}
+.arena.firing{border-color:#b9e1d8}.arena.impact{box-shadow:0 16px 38px rgba(31,74,71,.07),inset 0 0 0 2px rgba(41,166,152,.13)}
+.notice.show{animation:land .27s cubic-bezier(.16,1.6,.4,1) both}
+@keyframes land{0%{scale:.93}100%{scale:1}}
 .weapon-num{font-size:10px;font-weight:900;color:#8aa9a4;align-self:flex-start;line-height:1.1}
 .weapon-icon{width:24px;height:24px;flex:none;display:grid;place-items:center}
 .weapon-icon svg{width:26px;height:26px;display:block}
@@ -56,7 +62,7 @@ button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visibl
 <div class="arena-hint" id="arenaHint">立体の面をタップして狙いを決めよう</div>
 <div class="bottom"><button class="reset" id="resetBtn">やり直す</button><button class="fire" id="fireBtn" disabled>面をタップして狙おう</button></div>
 </section>
-<div class="foot">ドラッグで回転・好きな面から撃てる・タップで照準</div>
+<div class="foot">ドラッグで回転　·　面をタップして狙う　·　撃ち抜こう</div>
 </main>
 <script>
 'use strict';
@@ -67,20 +73,80 @@ const AX=['x','y','z'];const TAU=Math.PI*2;
 let W=0,H=0,dpr=1,scale=36,cx=0,cy=0;
 const defaultYaw=.72,defaultPitch=.63;
 let yaw=defaultYaw,pitch=defaultPitch,targetView=null,stage=0,highest=0,soundOn=true,audio=null;
-let selected=0,aims=[],shotsDone=false,settled=false,success=false,report=null,startTime=0,frame=0,hitAreas=[],pointer=null,history=[];
+let selected=0,aims=[],shotsDone=false,settled=false,success=false,report=null,startTime=0,frame=0,hitAreas=[],pointer=null,history=[],shotSeq=0;
+let aimPulse={start:0,aim:null,weapon:0},clearTime=0;
 const KEY='LASER_CUBE_V05';
 try{const j=JSON.parse(localStorage.getItem(KEY)||'{}');stage=Math.max(0,Math.min(LEVELS.length-1,j.stage||0));highest=Math.max(0,Math.min(LEVELS.length-1,j.highest||0));soundOn=j.sound!==false}catch(e){}
 const key=p=>p.join(','),clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),mix=(a,b,t)=>a+(b-a)*t;
 const comp=d=>[d[0],d[1],d[2]];
 const getLevel=()=>LEVELS[stage];
 function save(){try{localStorage.setItem(KEY,JSON.stringify({stage,highest,sound:soundOn}))}catch(e){}}
-function audioTone(f,d=.07,vol=.027,when=0,fall=1){if(!soundOn)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const t=audio.currentTime+when,osc=audio.createOscillator(),gain=audio.createGain();osc.type='sine';osc.frequency.setValueAtTime(f,t);osc.frequency.exponentialRampToValueAtTime(f*fall,t+d);gain.gain.setValueAtTime(.0001,t);gain.gain.linearRampToValueAtTime(vol,t+.01);gain.gain.exponentialRampToValueAtTime(.0001,t+d);osc.connect(gain).connect(audio.destination);osc.start(t);osc.stop(t+d+.012)}catch(e){}}
-function tapSound(){audioTone(622,.045,.020)}
-function soundLaser(){audioTone(690,.23,.045,0,1.18)}
-function soundShot(){audioTone(260,.13,.065,0,.64)}
-function soundBreak(type){audioTone(type==='laser'?730:370,.09,.025,0,type==='laser'?1.06:.81)}
-function soundWin(){[[523.25,0],[659.26,.13],[783.99,.26]].forEach(([f,t])=>audioTone(f,.12,.047,t))}
-function soundFail(){audioTone(392,.12,.030,0,.82)}
+// Sound engine: short transients, pitch discipline, and crisp noise textures.
+// No detuned oscillators, flabby sustained sine sweeps, or simultaneous random notes.
+let noiseBuffer=null, audioMaster=null;
+function ensureAudio(){
+ if(!soundOn)return null;
+ try{
+  audio??=new(window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+  if(audio.state==='suspended')audio.resume();
+  if(!audioMaster){audioMaster=audio.createGain();audioMaster.gain.value=.62;
+    const comp=audio.createDynamicsCompressor();comp.threshold.value=-17;comp.knee.value=14;comp.ratio.value=2.4;
+    comp.attack.value=.003;comp.release.value=.12;audioMaster.connect(comp);comp.connect(audio.destination);
+    noiseBuffer=audio.createBuffer(1,Math.floor(audio.sampleRate*.5),audio.sampleRate);
+    const data=noiseBuffer.getChannelData(0);let seed=59137;
+    for(let i=0;i<data.length;i++){seed=(seed*1664525+1013904223)>>>0;data[i]=(seed/2147483648-1)*.85;}
+  }
+  return audio;
+ }catch(e){return null}
+}
+function env(g,t,attack,decay,vol){
+ g.gain.cancelScheduledValues(t);g.gain.setValueAtTime(.0001,t);
+ g.gain.linearRampToValueAtTime(vol,t+Math.max(.001,attack));
+ g.gain.exponentialRampToValueAtTime(.0001,t+attack+decay);
+}
+function oscHit({from,to,attack=.002,decay=.095,vol=.12,type='triangle',delay=0}){
+ const c=ensureAudio();if(!c)return;
+ const t=c.currentTime+delay, o=c.createOscillator(),g=c.createGain();o.type=type;
+ o.frequency.setValueAtTime(from,t);o.frequency.exponentialRampToValueAtTime(Math.max(40,to),t+attack+decay);
+ env(g,t,attack,decay,vol);o.connect(g).connect(audioMaster);o.start(t);o.stop(t+attack+decay+.02);
+}
+function noiseHit({cut=2000,band='highpass',q=.8,attack=.001,decay=.065,vol=.10,delay=0}){
+ const c=ensureAudio();if(!c)return;
+ const t=c.currentTime+delay,n=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+ n.buffer=noiseBuffer;f.type=band;f.frequency.setValueAtTime(cut,t);f.Q.value=q;
+ env(g,t,attack,decay,vol);n.connect(f).connect(g).connect(audioMaster);n.start(t);n.stop(t+attack+decay+.016);
+}
+function tapSound(){
+ // Clean tactile 'tik' rather than a piano-like tone.
+ noiseHit({cut:2900,decay:.015,vol:.042});oscHit({from:1190,to:850,decay:.022,vol:.035,type:'triangle'});
+}
+function soundLaser(){
+ // Focused, brisk 'tss-zip': luminous high-frequency attack + rapid electronic streak.
+ noiseHit({cut:2200,decay:.10,vol:.14});
+ oscHit({from:1380,to:580,attack:.002,decay:.135,vol:.095,type:'triangle'});
+ oscHit({from:760,to:480,attack:.002,decay:.092,vol:.025,type:'sine'});
+}
+function soundShot(){
+ // Dense 'tak': crisp leading crack with a very short, non-wobbly impact body.
+ noiseHit({cut:1350,band:'bandpass',q:.7,decay:.065,vol:.23});
+ noiseHit({cut:2800,decay:.026,vol:.095});
+ oscHit({from:310,to:135,attack:.001,decay:.075,vol:.14,type:'triangle'});
+}
+function soundBreak(type,count=1){
+ if(type==='laser'){
+  noiseHit({cut:3200,decay:.038,vol:Math.min(.10,.045+count*.008)});
+  oscHit({from:1850,to:1210,decay:.035,vol:.045,type:'triangle'});
+ }else{
+  noiseHit({cut:1050,band:'bandpass',q:.85,decay:.072,vol:.12});
+  noiseHit({cut:3200,decay:.025,vol:.075});
+ }
+}
+function soundWin(){
+ // Three separate major-chord notes, never stacked into a dissonant cluster.
+ [[523.25,0],[659.26,.105],[783.99,.215]].forEach(([f,t])=>oscHit({from:f*1.004,to:f,delay:t,attack:.003,decay:.17,vol:.09,type:'sine'}));
+}
+function soundFail(){noiseHit({cut:1150,band:'bandpass',q:.55,decay:.09,vol:.055});}
+
 function origin(p){const d=getLevel().dims;return p.map((v,i)=>v-(d[i]-1)/2)}
 function camera(){const cp=Math.cos(pitch);return [Math.cos(yaw)*cp,Math.sin(yaw)*cp,Math.sin(pitch)]}
 function project(p){const cyaw=Math.cos(yaw),syaw=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);return{x:cx+(-syaw*p[0]+cyaw*p[1])*scale,y:cy+(sp*(cyaw*p[0]+syaw*p[1])-cp*p[2])*scale,depth:cp*(cyaw*p[0]+syaw*p[1])+sp*p[2]}}
@@ -108,34 +174,128 @@ function cubeFaces(c,kind,alpha=1,shrink=1){const o=origin(c),r=.49*shrink,dir=c
  const palette=kind==='blue'?['#a1e7dc','#51c8bb','#24afa5','#19827d']:['#f8dbab','#e7b676','#cb9256','#a97945'];
  for(const f of faces){if(f.n.reduce((v,x,i)=>v+x*dir[i],0)<.002)continue;polygon(f.v.map(vert),palette[f.shade],kind==='blue'?'#529c94':'#b58e65',.9,alpha)}
 }
-function currentTiming(now){if(!shotsDone)return {i:-1,progress:0};const t=Math.max(0,now-startTime);if(t>=aims.length*740)return {i:aims.length,progress:1,elapsed:t};return {i:Math.floor(t/740),progress:(t%740)/740,elapsed:t}}
-function drawSmashes(step,progress){if(!step||progress<.49)return;const c=step.type==='laser'?'#67c9b7':'#db9d62';const p=clamp((progress-.49)/.42,0,1);
- for(const [cellIndex,id] of step.broken.entries()){
- const at=project(origin(id.split(',').map(Number)));const amount=step.type==='laser'?9:7;
- ctx.save();ctx.globalAlpha=Math.max(0,1-p);for(let j=0;j<amount;j++){const ang=(j/amount)*TAU+cellIndex*1.16;const dist=(8+13*p+(j%3)*3)*p;const x=at.x+Math.cos(ang)*dist,y=at.y+Math.sin(ang)*dist+6*p*p;const r=(step.type==='laser'?1.5:2.9)*(1-p*.55);ctx.fillStyle=c;if(step.type==='laser'){ctx.fillRect(x,y,r*1.1,r*2.1)}else{ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y+r);ctx.lineTo(x-r,y+r);ctx.fill()}}ctx.restore();}
+const STEP_MS=655;
+function currentTiming(now){
+ if(!shotsDone)return {i:-1,progress:0};
+ const t=Math.max(0,now-startTime);
+ if(t>=aims.length*STEP_MS)return {i:aims.length,progress:1,elapsed:t};
+ return {i:Math.floor(t/STEP_MS),progress:(t%STEP_MS)/STEP_MS,elapsed:t};
 }
-function drawCubes(timing){const l=getLevel(),before=shotsDone&&report?report.snapshots[Math.min(timing.i,report.steps.length)]:null,now=shotsDone&&report?report.snapshots[Math.min(timing.i+1,report.steps.length)]:null;
- let active=new Set();if(shotsDone&&report&&timing.i>=0&&timing.i<report.steps.length){active=new Set(report.steps[timing.i].broken)}
- const blocks=[...l.blue.map(p=>({p,kind:'blue'})),...l.gold.map(p=>({p,kind:'gold'}))];const d=camera();blocks.sort((a,b)=>visible(origin(a.p))-visible(origin(b.p)));
- for(const b of blocks){const id=key(b.p),was=before?before.has(id):true;if(!was)continue;let alpha=1,shrink=1;
- if(active.has(id)){const start=report.steps[timing.i].type==='shot'?.51:.38;const t=clamp((timing.progress-start)/.32,0,1);alpha=1-t;shrink=1-.34*t}
- if(alpha>.02)cubeFaces(b.p,b.kind,alpha,shrink)}if(shotsDone&&report&&timing.i>=0&&timing.i<report.steps.length){drawSmashes(report.steps[timing.i],timing.progress);const s=report.steps[timing.i];if(s.goldHit.length&&timing.progress>.35&&timing.progress<.84){for(const id of s.goldHit){const p=project(origin(id.split(',').map(Number)));const f=clamp((timing.progress-.35)/.5,0,1);circle(p,scale*(.2+.22*f),null,(1-f)*.75,'#c07e56',2)}}}}
-function drawRay(now,t){const l=getLevel();if(!shotsDone){aims.forEach((aim,i)=>{if(!aim)return;const type=l.weapons[i],p=faceP(aim,.85),q=faceP(aim,.51);stroke(project(p),project(q),type==='laser'?'#139b90':'#d09a5d',2.8,i===selected?.9:.5)});return}
- if(!report||t.i<0||t.i>=l.weapons.length)return;
- const s=report.steps[t.i],aim=s.aim,type=s.type,d=l.dims,ax=aim.axis;
- const start=faceP(aim,1.15),exit=faceP({...aim,sign:-aim.sign},.58);
- const startPr=project(start),endPr=project(exit);
- if(type==='laser'){
- const f=clamp((t.progress-.10)/.24,0,1),fade=clamp((.83-t.progress)/.25,0,1);if(f<=0||fade<=0)return;
- const dest={x:mix(startPr.x,endPr.x,f),y:mix(startPr.y,endPr.y,f)};
- stroke(startPr,dest,'#159d94',9,fade*.16);stroke(startPr,dest,'#13c6b3',4.5,fade*.93);stroke(startPr,dest,'#eafff5',1.8,fade);circle(dest,3.2,'#fff',fade);
- }else{
- const hit=s.hits[0],p=hit?origin(hit.split(',').map(Number)):faceP({...aim,sign:-aim.sign},.50),dest=hit?p.map((v,j)=>j===ax?v+aim.sign*.46:v):p;
- const progress=clamp((t.progress-.13)/.39,0,1),at=project(start.map((v,j)=>mix(v,dest[j],progress)));
- if(t.progress<.62&&t.progress>.12){stroke(startPr,at,'#d89b55',7,.17);stroke(startPr,at,'#d39a59',2.7,.58);circle(at,9,'#f2d2a1',.20);circle(at,5.0,'#d89b59',.98);circle(at,2.3,'#fff5de',.99)}
- if(t.progress>.50&&t.progress<.79&&hit){const c=project(dest),f=clamp((t.progress-.5)/.29,0,1);circle(c,7+17*f,null,1-f,'#d49a5a',2.6);circle(c,4+11*f,null,(1-f)*.6,'#edd6ad',1.2)}
+const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
+function hitMoment(type,n,total){return type==='laser'?.255+(.16*n)/Math.max(1,total-1):.445;}
+function cubeState(step,cellId,progress){
+ const idx=step.broken.indexOf(cellId);if(idx<0)return {opacity:1,scale:1,phase:0};
+ const t=clamp((progress-hitMoment(step.type,idx,step.broken.length))/.23,0,1),e=smooth(t);
+ return {opacity:1-e,scale:1-.42*e,phase:t};
+}
+function shattered(step,progress){
+ if(!step)return;
+ const laser=step.type==='laser',color=laser?'#3bbfae':'#dba46b';
+ for(const [ci,id] of step.broken.entries()){
+  const t=clamp((progress-hitMoment(step.type,ci,step.broken.length))/.52,0,1);
+  if(t<=0||t>=1)continue;
+  const center=project(origin(id.split(',').map(Number)));
+  const amount=laser?12:15;
+  ctx.save();ctx.globalAlpha=Math.pow(1-t,1.15);
+  for(let j=0;j<amount;j++){
+   const ang=TAU*j/amount+ci*.92+(j%3)*.21;
+   const radius=(laser?11:7)+(laser?31:45)*t*(.72+(j%5)*.075);
+   const px=center.x+Math.cos(ang)*radius*t;
+   const py=center.y+Math.sin(ang)*radius*t+(laser?3:19)*t*t;
+   const size=(laser?1.5:3.9)*(1-.64*t)*(0.72+(j%4)*.13);
+   ctx.save();ctx.translate(px,py);ctx.rotate(ang+1.2*t);
+   if(laser){ctx.fillStyle=j%4===0?'#d9fff8':color;ctx.fillRect(-size*.35,-size*1.8,size*.75,size*3.1);}
+   else{ctx.fillStyle=j%5===0?'#fff2d6':color;ctx.beginPath();ctx.moveTo(0,-size);ctx.lineTo(size*.94,size*.6);ctx.lineTo(-size*.77,size*.8);ctx.closePath();ctx.fill();}
+   ctx.restore();
+  }
+  ctx.restore();
+  if(t<.46){
+   const radius=(laser?6:9)+(laser?21:26)*t;
+   circle(center,radius,null,(1-t/.46)*(laser?.45:.65),laser?'#85e7d8':'#e9b77b',laser?1.2:2.3);
+   if(!laser)circle(center,radius*.54,null,(1-t/.46)*.38,'#fff1d3',1.4);
+  }
  }
 }
+function drawCubes(timing){
+ const l=getLevel(),before=shotsDone&&report?report.snapshots[Math.min(timing.i,report.steps.length)]:null;
+ const step=shotsDone&&report&&timing.i>=0&&timing.i<report.steps.length?report.steps[timing.i]:null;
+ const blocks=[...l.blue.map(p=>({p,kind:'blue'})),...l.gold.map(p=>({p,kind:'gold'}))];blocks.sort((a,b)=>visible(origin(a.p))-visible(origin(b.p)));
+ for(const b of blocks){const id=key(b.p),was=before?before.has(id):true;
+  if(!was)continue;
+  const state=step?cubeState(step,id,timing.progress):{opacity:1,scale:1};
+  if(state.opacity>.008)cubeFaces(b.p,b.kind,state.opacity,state.scale);
+ }
+ if(step){
+  shattered(step,timing.progress);
+  if(step.goldHit.length&&timing.progress>.22&&timing.progress<.77){
+   for(const id of step.goldHit){const p=project(origin(id.split(',').map(Number))),f=clamp((timing.progress-.22)/.55,0,1);
+    circle(p,scale*(.17+.24*f),null,(1-f)*.8,'#c37d50',2.0);
+   }
+  }
+ }
+}
+function beamGradient(a,b,outer,inner,opacity=1){
+ ctx.save();ctx.globalAlpha=opacity;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+ ctx.strokeStyle=outer;ctx.lineWidth=11;ctx.shadowBlur=12;ctx.shadowColor=outer;ctx.globalAlpha=opacity*.33;ctx.stroke();
+ ctx.shadowBlur=0;ctx.globalAlpha=opacity*.95;ctx.strokeStyle=outer;ctx.lineWidth=4.4;ctx.stroke();
+ ctx.strokeStyle=inner;ctx.lineWidth=1.6;ctx.stroke();ctx.restore();
+}
+function drawRay(now,t){
+ const l=getLevel();if(!shotsDone){
+  aims.forEach((aim,i)=>{if(!aim)return;const type=l.weapons[i],p=faceP(aim,.84),q=faceP(aim,.50);
+    stroke(project(p),project(q),type==='laser'?'#119e94':'#ce9255',2.7,i===selected?.93:.45);
+  });return;
+ }
+ if(!report||t.i<0||t.i>=l.weapons.length)return;
+ const s=report.steps[t.i],aim=s.aim,type=s.type,ax=aim.axis;
+ const start=faceP(aim,1.02),startPr=project(start);
+ if(type==='laser'){
+  const end=faceP({...aim,sign:-aim.sign},.54),endPr=project(end);
+  const travel=smooth((t.progress-.075)/.38);
+  const fade=clamp((.89-t.progress)/.30,0,1);
+  if(travel<=0||fade<=0)return;
+  const point={x:mix(startPr.x,endPr.x,travel),y:mix(startPr.y,endPr.y,travel)};
+  beamGradient(startPr,point,'#18b5a4','#f0fff8',fade);
+  ctx.save();ctx.shadowColor='#82ffe4';ctx.shadowBlur=14;circle(point,4.2,'#eafff6',fade);ctx.restore();
+  for(let j=0;j<5;j++){
+   const u=(j+.5)/5*travel,q={x:mix(startPr.x,endPr.x,u),y:mix(startPr.y,endPr.y,u)};
+   circle(q,1.2,'#dafff4',fade*(1-.1*j));
+  }
+ }else{
+  const hit=s.hits[0];const p=hit?origin(hit.split(',').map(Number)):faceP({...aim,sign:-aim.sign},.5);
+  const dest=hit?p.map((v,j)=>j===ax?v+aim.sign*.49:v):p;
+  const endPr=project(dest),f=smooth((t.progress-.09)/.355);
+  if(f>0&&f<1){
+   const tip={x:mix(startPr.x,endPr.x,f),y:mix(startPr.y,endPr.y,f)};
+   const prev={x:mix(startPr.x,endPr.x,Math.max(0,f-.16)),y:mix(startPr.y,endPr.y,Math.max(0,f-.16))};
+   beamGradient(prev,tip,'#e6ac62','#fff3d5',.86);
+   circle(tip,6.2,'#a96a39',.92,'#f4d4a9',1.2);circle(tip,2.7,'#fff8e8',1);
+  }
+  if(f>=.99&&t.progress<.77&&hit){
+   const life=clamp((t.progress-.445)/.325,0,1);
+   if(life>0){
+    circle(endPr,8+31*life,null,(1-life)*.77,'#cd8d4d',2.5);
+    circle(endPr,4+17*life,null,(1-life)*.50,'#f5d29d',1.2);
+    ctx.save();ctx.globalAlpha=Math.max(0,1-life);ctx.strokeStyle='#fff3dc';ctx.lineWidth=1.6;
+    for(let i=0;i<6;i++){const a=i*TAU/6+.25,r=12+19*life;ctx.beginPath();ctx.moveTo(endPr.x+Math.cos(a)*r*.48,endPr.y+Math.sin(a)*r*.48);ctx.lineTo(endPr.x+Math.cos(a)*r,endPr.y+Math.sin(a)*r);ctx.stroke();}
+    ctx.restore();
+   }
+  }
+ }
+}
+function drawAimPulse(now){
+ if(!aimPulse.aim||shotsDone)return;
+ const e=(now-aimPulse.start)/420;if(e<0||e>1)return;
+ const p=project(faceP(aimPulse.aim,.55)),t=smooth(e),type=getLevel().weapons[aimPulse.weapon];
+ circle(p,11+18*t,null,(1-e)*.72,type==='laser'?'#28ad9c':'#d29a5d',2.0);
+}
+function drawCompletion(t){
+ if(!success||!settled)return;
+ const age=clamp((performance.now()-clearTime)/880,0,1),p=project([0,0,0]),r=scale*(.7+1.35*age);
+ circle(p,r,null,Math.pow(1-age,2)*.33,'#34b7a5',2);
+}
+
 function inPoly(pt,ps){let inside=false;for(let i=0,j=ps.length-1;i<ps.length;j=i++){const a=ps[i],b=ps[j];if(((a.y>pt.y)!==(b.y>pt.y))&&(pt.x<(b.x-a.x)*(pt.y-a.y)/(b.y-a.y)+a.x))inside=!inside}return inside}
 function drawnAims(){const d=getLevel().dims;
  for(let i=0;i<aims.length;i++){const aim=aims[i];if(!aim)continue;const type=getLevel().weapons[i],p=project(faceP(aim,.535));const isFront=camera()[aim.axis]*aim.sign>.05;if(!isFront)continue;const active=i===selected&&!shotsDone,color=type==='laser'?'#129e91':'#c78e51';
@@ -156,7 +316,7 @@ function drawFaceTargets(){hitAreas=[];if(shotsDone)return;const d=getLevel().di
  drawnAims();}
 function drawShadow(){const base=project([0,0,-getLevel().dims[2]/2-.65]);ctx.save();ctx.fillStyle='rgba(64,103,92,.035)';ctx.beginPath();ctx.ellipse(base.x,base.y+12,scale*1.8,scale*.4,0,0,TAU);ctx.fill();ctx.restore()}
 function draw(now){frame=requestAnimationFrame(draw);if(!W||!H)return;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(targetView){yaw=mix(yaw,targetView[0],.14);pitch=mix(pitch,targetView[1],.14);if(Math.abs(yaw-targetView[0])+Math.abs(pitch-targetView[1])<.002)targetView=null}
- drawShadow();drawFrame();const t=currentTiming(now);drawCubes(t);drawRay(now,t);drawFaceTargets();if(shotsDone)drawnAims();}
+ drawShadow();drawFrame();const t=currentTiming(now);drawCubes(t);drawRay(now,t);drawFaceTargets();drawAimPulse(now);if(shotsDone)drawnAims();drawCompletion(t);}
 function weaponIcon(type){return type==='laser'?`<svg viewBox="0 0 28 28" aria-hidden="true"><g fill="none" stroke="#78b5ac" stroke-width="1.3"><rect x="2" y="8" width="8" height="12" rx="1.5"/><rect x="10" y="8" width="8" height="12" rx="1.5"/><rect x="18" y="8" width="8" height="12" rx="1.5"/></g><path d="M1 14h26" stroke="#119b90" stroke-width="2.6" stroke-linecap="round"/></svg>`:`<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="8" width="8" height="12" rx="1.5" fill="#e7c9a6" stroke="#ba915e" stroke-width="1.2"/><rect x="15" y="8" width="9" height="12" rx="1.5" fill="none" stroke="#d2dcd7" stroke-width="1.2"/><path d="M1 14h10" stroke="#ca8d4c" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="14" r="2.6" fill="#ca8d4c"/></svg>`}
 function hud(){const l=getLevel();$('count').textContent=String(stage+1).padStart(2,'0')+' / '+LEVELS.length;$('chapter').textContent=stage<3?'01 / 光と弾':stage<7?'02 / 方向を読む':'03 / 三手の設計';$('title').textContent=l.title;
  $('subtitle').textContent=stage===0?'緑の光は、まっすぐ貫通する。':stage===1?'オレンジの弾は、手前の一個だけ。':'青をすべて消し、金色には当てない。';$('progress').style.width=(100*(stage+1)/LEVELS.length)+'%';$('prev').disabled=stage===0;$('next').disabled=stage>=highest;
@@ -164,27 +324,49 @@ function hud(){const l=getLevel();$('count').textContent=String(stage+1).padStar
  const ready=aims.every(Boolean);$('fireBtn').disabled=!ready&&!shotsDone;
  $('fireBtn').classList.toggle('next',success);
  $('fireBtn').textContent=success?(stage===LEVELS.length-1?'14問クリア！ ↻':'次のステージへ →'):shotsDone?(settled?'照準を直す':'射撃中…'):(ready?`${l.weapons.length} 発、発射する`:'面をタップして狙おう');
- $('arenaHint').textContent=success?'狙いどおり。すべての青を消した。':shotsDone?(settled?'狙いを見直して、もう一度。':'レーザーとショットで消え方が違う'):aims.every(Boolean)?'どこから撃つか、最後に確認しよう':`「${l.weapons[selected]==='laser'?'レーザー：一直線に貫通':'ショット：最初の1個だけ'}」を選択中`;
+ $('arenaHint').textContent=success?'狙いどおり。すべての青を消した。':shotsDone?(settled?'狙いを見直して、もう一度。':'レーザーは貫通、ショットは衝撃で一個を破壊'):aims.every(Boolean)?'どこから撃つか、最後に確認しよう':`「${l.weapons[selected]==='laser'?'レーザー：一直線に貫通':'ショット：最初の1個だけ'}」を選択中`;
  $('resetBtn').textContent=shotsDone?'戻す':'照準クリア';
  $('notice').classList.toggle('show',settled);$('notice').classList.toggle('bad',settled&&!success);
  if(settled){$('noticeTitle').textContent=success?'CLEAR!':report.goldHit.length?'金色に当たった！':report.wasted?'空振りがあった！':'青が残った';$('noticeDesc').textContent=success?'考えた3本の射線が、ぴったり。':report.goldHit.length?'金色には当てず、青だけを消そう':report.wasted?'すべての武器を使って消そう':`${report.blueLeft.length}個、まだ残っている`}
 }
-function show(i){stage=clamp(i,0,LEVELS.length-1);selected=0;aims=getLevel().weapons.map(()=>null);yaw=defaultYaw;pitch=defaultPitch;targetView=null;shotsDone=false;settled=false;success=false;report=null;history=[];hud();save();resize()}
+function show(i){shotSeq++;stage=clamp(i,0,LEVELS.length-1);selected=0;aims=getLevel().weapons.map(()=>null);yaw=defaultYaw;pitch=defaultPitch;targetView=null;shotsDone=false;settled=false;success=false;report=null;history=[];hud();save();resize()}
 function setSelected(i){if(shotsDone)return;selected=i;tapSound();hud()}
-function setAim(i,aim){if(shotsDone)return;aims[i]={...aim};history.push({i,aim:{...aim}});tapSound();const next=aims.findIndex((a,j)=>!a&&j!==i);if(next>=0)selected=next;hud()}
+function setAim(i,aim){if(shotsDone)return;aims[i]={...aim};history.push({i,aim:{...aim}});aimPulse={start:performance.now(),aim:{...aim},weapon:i};tapSound();const next=aims.findIndex((a,j)=>!a&&j!==i);if(next>=0)selected=next;hud()}
 function nearestFace(x,y){const candidates=hitAreas.filter(a=>inPoly({x,y},a.corners));if(!candidates.length)return null;candidates.sort((a,b)=>b.depth-a.depth);return candidates[0].aim}
-function planFire(){if(success){if(stage<LEVELS.length-1)show(stage+1);else show(0);tapSound();return}
- if(shotsDone){if(!settled)return;shotsDone=false;settled=false;report=null;hud();return}
- if(aims.some(a=>!a))return;report=evaluate();if(!report)return;shotsDone=true;settled=false;startTime=performance.now();hud();const now=performance.now();
- for(let i=0;i<aims.length;i++){setTimeout(()=>{if(!shotsDone)return;const s=report.steps[i];if(s.type==='laser')soundLaser();else soundShot();setTimeout(()=>{if(shotsDone&&report)for(let j=0;j<Math.min(3,s.broken.length);j++)soundBreak(s.type)},340)},i*740)}
- setTimeout(()=>{if(!shotsDone)return;settled=true;success=report.ok;if(success){highest=Math.max(highest,Math.min(LEVELS.length-1,stage+1));soundWin();save()}else soundFail();hud()},aims.length*740+100);
+function planFire(){
+ if(success){if(stage<LEVELS.length-1)show(stage+1);else show(0);tapSound();return}
+ if(shotsDone){if(!settled)return;shotSeq++;shotsDone=false;settled=false;report=null;arena.classList.remove('firing','impact');hud();tapSound();return}
+ if(aims.some(a=>!a))return;
+ ensureAudio(); // Audio starts in the real button tap, not after a delayed callback.
+ report=evaluate();if(!report)return;
+ const run=++shotSeq;shotsDone=true;settled=false;startTime=performance.now();arena.classList.add('firing');hud();
+ for(let i=0;i<aims.length;i++){
+  const step=report.steps[i],base=i*STEP_MS;
+  setTimeout(()=>{
+   if(run!==shotSeq||!shotsDone)return;
+   if(step.type==='laser')soundLaser();else soundShot();
+  },base+70);
+  const impact=hitMoment(step.type,0,Math.max(1,step.broken.length));
+  setTimeout(()=>{
+   if(run!==shotSeq||!shotsDone)return;
+   if(step.broken.length) soundBreak(step.type,step.broken.length);
+   arena.classList.add('impact');setTimeout(()=>{if(run===shotSeq)arena.classList.remove('impact')},105);
+  },base+impact*STEP_MS);
+ }
+ setTimeout(()=>{
+  if(run!==shotSeq||!shotsDone)return;
+  settled=true;success=report.ok;arena.classList.remove('firing','impact');
+  if(success){clearTime=performance.now();highest=Math.max(highest,Math.min(LEVELS.length-1,stage+1));soundWin();save();}
+  else soundFail();hud();
+ },aims.length*STEP_MS+60);
 }
+
 canvas.addEventListener('pointerdown',e=>{pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>7)pointer.moved=true;if(pointer.moved){targetView=null;yaw+=dx*.011;pitch-=dy*.010;}});
 canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.moved&&!shotsDone){const r=canvas.getBoundingClientRect(),a=nearestFace(e.clientX-r.left,e.clientY-r.top);if(a)setAim(selected,a)}pointer=null});canvas.addEventListener('pointercancel',()=>pointer=null);
 $('loadout').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)setSelected(Number(b.dataset.i))});
 $('fireBtn').addEventListener('click',planFire);
-$('resetBtn').addEventListener('click',()=>{if(shotsDone){shotsDone=false;settled=false;success=false;report=null;hud()}else{aims=getLevel().weapons.map(()=>null);selected=0;hud();tapSound()}});
+$('resetBtn').addEventListener('click',()=>{if(shotsDone){shotSeq++;shotsDone=false;settled=false;success=false;report=null;arena.classList.remove('firing','impact');hud()}else{aims=getLevel().weapons.map(()=>null);selected=0;aimPulse.aim=null;hud();tapSound()}});
 $('viewBtn').addEventListener('click',()=>{targetView=[defaultYaw,defaultPitch];tapSound()});
 function soundHud(){$('soundBtn').style.color=soundOn?'#418e84':'#b2bfba';$('soundBtn').setAttribute('aria-pressed',String(soundOn))}
 $('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;save();soundHud();tapSound()});
