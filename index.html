@@ -3,340 +3,195 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#f4f8f7">
+<meta name="theme-color" content="#f6f9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — 立体を、見抜け。</title>
+<title>LASER CUBE — 方向は、あなたが決める</title>
 <style>
-:root{--paper:#f4f8f7;--ink:#16383e;--light:#809996;--mint:#109b92;--aqua:#55c7ba;--gold:#c79b62;--line:#dce9e5;--white:#fff;--shadow:0 13px 38px rgba(29,67,67,.075)}
+:root{--bg:#f6f9f7;--ink:#193b3d;--mute:#789391;--mint:#159b91;--mint-light:#d7f5ed;--warm:#c7864a;--line:#dce9e5;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;min-height:100%;background:var(--paper);color:var(--ink);overscroll-behavior:none}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);overscroll-behavior:none}
 body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}
-button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
-button:active{transform:scale(.97)}button:disabled{opacity:.27;cursor:default}
-.app{width:min(100%,530px);height:100svh;height:100dvh;min-height:520px;margin:auto;padding:calc(env(safe-area-inset-top) + 10px) 17px calc(env(safe-area-inset-bottom) + 12px);display:flex;flex-direction:column;gap:10px}
-.top{display:flex;align-items:center;justify-content:space-between;min-height:38px;flex:none}
-.logo{font-weight:900;letter-spacing:.12em;font-size:18px;white-space:nowrap}.logo span{color:#1ba99d}
-.topbuttons{display:flex;gap:3px}.iconbtn{width:39px;height:39px;border:0;border-radius:13px;background:transparent;color:#78938e;display:grid;place-items:center}.iconbtn:active{background:#e3efeb}
-.iconbtn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
-.stage{padding:2px 2px 0;flex:none}
-.strap{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#75918d;font-size:10px;letter-spacing:.15em;font-weight:800}
-.stagenav{display:flex;align-items:center;gap:7px;color:#537b78;font-variant-numeric:tabular-nums;letter-spacing:.05em}.navbtn{border:none;background:transparent;color:#829f99;display:grid;place-items:center;width:20px;height:22px;font-size:19px;font-weight:400;padding:0}
-.progress{height:3px;border-radius:9px;background:#e0ebe7;margin-top:7px;overflow:hidden}.progress>i{display:block;height:100%;width:5%;background:linear-gradient(90deg,#79d6c6,#0f9c91);border-radius:9px;transition:width .3s}
-.stage h1{text-align:center;font-size:19px;font-weight:820;letter-spacing:.03em;margin:9px 0 0;line-height:1.25}
-.desc{text-align:center;font-size:11px;color:#88a19d;margin:6px 0 0;letter-spacing:.02em}
-.board{position:relative;flex:1 1 auto;min-height:245px;border:1px solid #deebe7;overflow:hidden;border-radius:30px;box-shadow:var(--shadow),inset 0 1px 0 white;background:radial-gradient(ellipse 78% 68% at 50% 45%,#fff 1%,#fafdfe 48%,#edf6f3 100%);touch-action:none;user-select:none;-webkit-user-select:none}
-#cube{width:100%;height:100%;display:block;touch-action:none;cursor:grab}#cube:active{cursor:grabbing}
-.hud{position:absolute;pointer-events:none;top:13px;left:15px;display:flex;gap:11px;align-items:center}
-.hudpiece{display:flex;align-items:center;gap:5px;color:#6d8b88;font-weight:760;font-size:10px;font-variant-numeric:tabular-nums;letter-spacing:.03em}
-.dot{width:9px;height:9px;border-radius:3px;display:inline-block;background:#32b4ab;box-shadow:0 0 0 2px #e0f3ed}.dot.gold{background:#d6a16a;box-shadow:0 0 0 2px #faf0e3}.dot.purple{background:#9781ca;box-shadow:0 0 0 2px #ece8f6}
-.boardnote{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:10px;color:#95aaa6;letter-spacing:.03em;pointer-events:none;transition:opacity .15s}
-.result{pointer-events:none;position:absolute;top:40px;left:50%;transform:translateX(-50%) translateY(-8px);width:max-content;max-width:91%;text-align:center;opacity:0;transition:opacity .25s,transform .25s;border:1px solid #e0eee9;box-shadow:0 10px 30px rgba(20,74,65,.1);border-radius:18px;padding:9px 18px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px)}
-.result.visible{opacity:1;transform:translateX(-50%) translateY(0)}.result strong{font-size:17px;font-weight:850;letter-spacing:.08em;color:#168f87}.result.fail strong{color:#bb8760}.result small{font-size:10px;color:#829a96;display:block;margin-top:3px}
-.panel{flex:none;display:flex;flex-direction:column;gap:9px}
-.gunrow{display:grid;grid-template-columns:repeat(var(--shots,3),minmax(0,1fr));gap:7px}
-.gun{min-height:91px;border-radius:15px;border:1px solid #dce9e6;background:rgba(255,255,255,.81);padding:8px 7px 7px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;position:relative;min-width:0;text-align:center;color:var(--ink)}
-.gun.off{opacity:.3}.gun.active{border-color:#7ccbc0}.gun.selected{border-color:#159b92;box-shadow:0 0 0 1px rgba(30,160,150,.2);background:#f7fffd}.gun:not(.off){cursor:pointer}
-.gun.isShot.selected{border-color:#d7ac7a;box-shadow:0 0 0 1px rgba(206,151,87,.22);background:#fffaf4}
-.gunhead{display:flex;gap:5px;align-items:center;justify-content:center;width:100%;font-size:10px;font-weight:800;color:#688c89}
-.gunhead .gunletter{font-size:13px;font-weight:920;color:#395d61}
-.gun.isShot .gunletter{color:#ad7850}
-.gunsymbol{display:block;width:68px;max-width:96%;height:22px}
-.gunlabel{font-weight:850;font-size:12px;white-space:nowrap;color:#118d85;letter-spacing:.01em}
-.gun.isShot .gunlabel{color:#b88652}
-.gunstate{color:#91aaa5;font-size:9px;white-space:nowrap;line-height:1.15}
-.gunorder{position:absolute;right:6px;top:5px;color:#9bb0ad;font-size:9px;font-weight:800}
-.gunpin{position:absolute;left:7px;top:8px;width:5px;height:5px;border-radius:100%;background:#cbdad5}.gun.selected .gunpin{background:#1cae9d}.gun.isShot.selected .gunpin{background:#d29e65}
-.weaponHint{position:absolute;right:12px;top:10px;min-height:20px;pointer-events:none;background:rgba(255,255,255,.91);border:1px solid #e1eae7;padding:5px 9px;border-radius:11px;font-size:10px;font-weight:780;color:#138f87;box-shadow:0 3px 14px rgba(35,91,84,.035)}
-.weaponHint.shot{color:#b58147;border-color:#eadbca;background:rgba(255,252,248,.95)}
-.actions{display:flex;align-items:stretch;gap:9px;min-height:54px}
-.smallbtn{width:72px;border:1px solid #dbe8e4;background:#fafffd;border-radius:16px;font-size:12px;font-weight:770;color:#70908c}
-.firebtn{flex:1;border:0;border-radius:17px;font-size:15px;font-weight:850;letter-spacing:.1em;display:flex;justify-content:center;gap:10px;align-items:center;background:#118f89;color:#fff;box-shadow:0 9px 19px rgba(14,142,133,.22);transition:transform .12s,background .15s,box-shadow .15s}
-.firebtn:disabled{background:#b9d8d1;box-shadow:none;opacity:1}.firebtn:active{transform:scale(.985);box-shadow:0 3px 12px rgba(14,142,133,.2)}.firebtn.next{background:#147970}
-.tip{min-height:17px;text-align:center;font-size:10px;color:#91a9a5;line-height:1.4}
-@media(max-height:660px){.app{gap:6px;padding-top:calc(env(safe-area-inset-top) + 6px);padding-bottom:calc(env(safe-area-inset-bottom) + 6px)}.stage h1{font-size:17px;margin-top:6px}.desc{margin-top:3px}.gun{min-height:75px;padding:5px 3px}.gunsymbol{height:18px}.gunlabel{font-size:10px}.actions{min-height:49px}.panel{gap:7px}.gunstate{font-size:9px}.board{min-height:220px}}
-@media(max-width:345px){.gun{gap:2px;padding:5px 2px}.gunhead .gunletter{font-size:11px}.gunlabel{font-size:10px}.gunstate{font-size:8px}.app{padding-left:10px;padding-right:10px}.logo{font-size:16px}}
-
-/* V4: controls live WITH the 3D puzzle, never in a detached loadout row. */
-.tip{display:none}
-.board{isolation:isolate}
-.hud{z-index:2}
-.weaponHint{top:40px;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap;max-width:96%;border-radius:13px;padding:6px 11px;font-size:11px;z-index:4;box-shadow:0 5px 16px rgba(24,68,63,.055)}
-.boardnote{bottom:83px;font-size:10px;opacity:.8;z-index:2}
-.gunrow{position:absolute;left:9px;right:9px;bottom:9px;display:grid;grid-template-columns:repeat(var(--shots,3),minmax(0,1fr));gap:6px;z-index:5;pointer-events:auto}
-.gun{height:58px;min-height:0;border-radius:13px;padding:5px 3px;gap:0;justify-content:center;background:rgba(255,255,255,.94);border:1px solid #dfeae6;box-shadow:0 2px 8px rgba(35,88,79,.045);backdrop-filter:blur(9px)}
-.gun.selected{border:2px solid #159b92;padding:4px 2px;background:rgba(243,255,251,.97)}
-.gun.isShot.selected{border-color:#c89661;background:#fffbf5}
-.gunhead{font-size:10px;gap:4px;line-height:1.2}
-.gunhead .gunletter{font-size:13px;color:#315a58}
-.gun.isShot .gunhead .gunletter{color:#9f7049}
-.gunorder{font-size:9px;right:6px;top:4px}
-.gunsymbol{width:48px;height:16px;max-width:90%;margin-top:0}
-.gunlabel,.gunstate{display:none}
-.gunpin{left:6px;top:7px}
-.panel{gap:5px}
-.tip{font-size:10px;min-height:15px}
-@media(max-height:660px){.gunrow{bottom:5px}.gun{height:44px;min-height:0;padding:3px 2px}.gun.selected{padding:2px 1px}.gunsymbol{width:40px;height:13px}.boardnote{bottom:54px}.weaponHint{top:33px;font-size:10px;padding:4px 8px}}
-@media(max-width:345px){.gunrow{gap:4px;left:5px;right:5px}.gun{padding:4px 1px}.gunhead .gunletter{font-size:11px}.gunhead{font-size:9px}.weaponHint{font-size:10px}}
+button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:2px solid #319d91;outline-offset:2px}
+.app{width:min(100%,520px);height:100dvh;min-height:490px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 9px) 14px calc(env(safe-area-inset-bottom) + 9px);display:flex;flex-direction:column;gap:8px}
+.top{display:flex;align-items:center;justify-content:space-between;flex:none;min-height:41px;padding:0 5px}
+.logo{font-size:18px;letter-spacing:.105em;font-weight:890}.logo b{color:var(--mint)}
+.right{display:flex;gap:2px}.iconbtn{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:13px;background:transparent;color:#769793}.iconbtn:active{background:#e6f0ed}.iconbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.stagehead{flex:none;padding:1px 4px 0}
+.meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.13em;color:#8aa29e}
+.nav{display:flex;align-items:center;gap:7px;letter-spacing:.04em;font-size:11px}.navbtn{padding:0;border:0;background:transparent;color:#8facaa;font-size:22px;line-height:18px;width:24px;height:22px}.navbtn:disabled{opacity:.22}
+.progress{height:3px;border-radius:5px;background:#e5edea;margin-top:7px;overflow:hidden}.progress i{height:100%;display:block;width:7%;border-radius:5px;background:linear-gradient(90deg,#80d8c9,#158d85);transition:width .3s}
+.title{text-align:center;font-size:18px;font-weight:870;letter-spacing:.028em;margin:8px 0 0}.subtitle{text-align:center;font-size:11px;color:var(--mute);margin:4px 0 0}
+.arena{position:relative;flex:1 1 auto;min-height:235px;border:1px solid #ddeae6;border-radius:27px;overflow:hidden;isolation:isolate;touch-action:none;box-shadow:0 16px 38px rgba(31,74,71,.07),inset 0 1px rgba(255,255,255,.9);background:radial-gradient(ellipse 92% 70% at 51% 47%,#fff 0%,#fbfefd 52%,#eff6f3 100%);user-select:none;-webkit-user-select:none}
+#scene{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}#scene:active{cursor:grabbing}
+.loadout{position:absolute;left:9px;right:9px;top:9px;display:flex;gap:6px;pointer-events:none}
+.weapon{pointer-events:auto;min-width:0;flex:1;display:flex;align-items:center;gap:6px;padding:8px 8px;border:1px solid rgba(201,222,216,.92);background:rgba(255,255,255,.84);border-radius:14px;box-shadow:0 2px 10px rgba(27,70,64,.035);text-align:left;transition:border-color .13s,background .13s}
+.weapon.selected{border-color:#48bbaa;background:rgba(242,255,252,.97);box-shadow:0 0 0 1px rgba(30,162,148,.16),0 6px 15px rgba(24,128,113,.07)}
+.weapon.selected.shot{border-color:#d6a66d;background:rgba(255,249,240,.96);box-shadow:0 0 0 1px rgba(197,145,86,.13)}
+.weapon.done{background:rgba(248,251,250,.75)}
+.weapon-num{font-size:10px;font-weight:900;color:#8aa9a4;align-self:flex-start;line-height:1.1}
+.weapon-icon{width:24px;height:24px;flex:none;display:grid;place-items:center}
+.weapon-icon svg{width:26px;height:26px;display:block}
+.weapon-copy{min-width:0}.weapon-type{display:block;font-size:11px;font-weight:880;line-height:1.1;white-space:nowrap}.weapon-state{display:block;font-size:9px;color:#8ca8a3;white-space:nowrap;margin-top:3px}
+.shot .weapon-type{color:#b77b45}.laser .weapon-type{color:#158e84}
+.arena-hint{position:absolute;bottom:69px;left:10px;right:10px;text-align:center;font-size:10px;color:#8ba6a1;pointer-events:none;line-height:1.35;min-height:15px}
+.bottom{position:absolute;bottom:11px;left:11px;right:11px;display:flex;gap:8px;align-items:center;height:47px}
+.reset{height:47px;padding:0 13px;flex:none;border:1px solid #d9e8e4;background:rgba(255,255,255,.88);color:#6d928d;font-weight:780;font-size:12px;border-radius:14px}
+.fire{height:47px;flex:1;border:0;border-radius:14px;color:#fff;background:#129b90;font-size:14px;font-weight:880;letter-spacing:.075em;box-shadow:0 9px 18px rgba(22,140,128,.22);transition:transform .14s,background .14s}.fire:active{transform:scale(.98)}.fire:disabled{background:#b9d8d0;box-shadow:none;opacity:1}.fire.next{background:#127d74}
+.notice{position:absolute;left:50%;top:91px;transform:translateX(-50%) translateY(-8px);width:max-content;max-width:91%;text-align:center;border-radius:18px;padding:9px 17px;background:rgba(255,255,255,.94);border:1px solid #e2eee9;box-shadow:0 10px 24px rgba(31,75,70,.10);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+.notice.show{opacity:1;transform:translateX(-50%) translateY(0)}.notice strong{display:block;font-weight:920;font-size:18px;color:#168e85;letter-spacing:.075em}.notice small{font-size:10px;display:block;margin-top:3px;color:#829993}.notice.bad strong{color:#bf8355}
+.foot{flex:none;min-height:15px;text-align:center;color:#a3b5b0;font-size:9px;letter-spacing:.02em}
+@media(max-height:670px){.app{gap:4px;padding-top:calc(env(safe-area-inset-top) + 5px);padding-bottom:calc(env(safe-area-inset-bottom) + 5px)}.top{min-height:34px}.iconbtn{width:35px;height:35px}.title{font-size:16px;margin-top:5px}.subtitle{font-size:10px}.arena{min-height:205px}.weapon{padding:6px 5px;gap:4px}.loadout{top:7px}.arena-hint{bottom:59px}.bottom{height:42px}.reset,.fire{height:42px}.notice{top:75px}}
+@media(max-width:350px){.app{padding-left:8px;padding-right:8px}.weapon-icon{width:20px}.weapon-icon svg{width:23px}.weapon-type{font-size:10px}.weapon-state{font-size:8px}.weapon{padding:6px 4px}.logo{font-size:16px}}
 </style>
 </head>
 <body><main class="app">
-  <header class="top"><div class="logo">LASER <span>CUBE</span></div><div class="topbuttons">
-    <button class="iconbtn" id="homeView" aria-label="視点をもどす" title="視点をもどす"><svg viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 3 7"/><path d="M3 4v7h7"/></svg></button>
-    <button class="iconbtn" id="soundBtn" aria-label="音のオンオフ"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg></button>
-  </div></header>
-  <section class="stage"><div class="strap"><span id="chapter">CHAPTER 01 · つらぬく</span><div class="stagenav"><button class="navbtn" id="prev" aria-label="前の問題">‹</button><span id="stageNum">01 / 12</span><button class="navbtn" id="nextStage" aria-label="次の問題">›</button></div></div><div class="progress"><i id="progress"></i></div><h1 id="title">奥まで一直線</h1><p class="desc" id="desc">面の照準を選んで、射線を組み立てる。</p></section>
-  <section class="board" id="board" aria-label="3Dキューブの射撃パズル"><canvas id="cube"></canvas>
-    <div class="hud"><div class="hudpiece"><i class="dot"></i><span id="blueCount">3</span></div><div class="hudpiece" id="purpleHud" style="display:none"><i class="dot purple"></i><span id="purpleCount">1 × 2</span></div><div class="hudpiece"><i class="dot gold"></i><span id="goldCount">4</span></div></div>
-    <div class="weaponHint" id="weaponHint" aria-live="polite"></div><div class="gunrow" id="guns" aria-label="射撃の順番と武器"></div><div class="result" id="result"><strong id="resultTitle">CLEAR!</strong><small id="resultSub">すべての青に命中</small></div>
-    <div class="boardnote" id="boardnote">丸をタップで照準 · 立体をドラッグで回転</div>
-  </section>
-  <section class="panel"><div class="actions"><button class="smallbtn" id="hint">ヒント</button><button class="firebtn" id="fire" disabled>照準を合わせよう</button></div><div class="tip" id="tip">順番を想像して、すべての狙いをセットしよう。</div></section>
+<header class="top"><div class="logo">LASER <b>CUBE</b></div><div class="right">
+<button class="iconbtn" id="viewBtn" title="視点をもどす" aria-label="視点をもどす"><svg viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 3 7M3 4v7h7"/></svg></button>
+<button class="iconbtn" id="soundBtn" title="音のオンオフ" aria-label="音のオンオフ"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg></button>
+</div></header>
+<div class="stagehead"><div class="meta"><span id="chapter">01 / はじめの一撃</span><div class="nav"><button class="navbtn" id="prev" aria-label="前へ">‹</button><span id="count">01 / 14</span><button class="navbtn" id="next" aria-label="次へ">›</button></div></div><div class="progress"><i id="progress"></i></div><div class="title" id="title">一本の光</div><div class="subtitle" id="subtitle">青をすべて消す。金色は守る。</div></div>
+<section class="arena" id="arena"><canvas id="scene" aria-label="立体の面をタップしてレーザーやショットをセット"></canvas>
+<div class="loadout" id="loadout"></div>
+<div class="notice" id="notice"><strong id="noticeTitle">CLEAR!</strong><small id="noticeDesc"></small></div>
+<div class="arena-hint" id="arenaHint">立体の面をタップして狙いを決めよう</div>
+<div class="bottom"><button class="reset" id="resetBtn">やり直す</button><button class="fire" id="fireBtn" disabled>面をタップして狙おう</button></div>
+</section>
+<div class="foot">ドラッグで回転・好きな面から撃てる・タップで照準</div>
 </main>
 <script>
 'use strict';
 (()=>{
-const LEVELS=[{"title":"奥まで一直線","chapter":"01 つらぬく","weapons":[{"axis":"z","type":"laser"}],"blue":[[1,1,0],[1,1,1],[1,1,2]],"purple":[],"gold":[[0,2,2],[2,1,1],[0,0,2],[0,2,1],[2,1,2]],"solution":[4],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"ふたつの方向","chapter":"01 つらぬく","weapons":[{"axis":"x","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,0,2],[1,0,2],[2,0,2],[1,2,0],[1,2,1],[1,2,2]],"purple":[],"gold":[[2,2,0],[0,2,0],[0,0,0],[0,0,1],[0,1,1]],"solution":[2,5],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"1発では、届かない","chapter":"02 奥行き","weapons":[{"axis":"z","type":"shot"},{"axis":"z","type":"shot"}],"blue":[[1,1,2],[1,1,1]],"purple":[],"gold":[[1,2,2],[1,1,0],[2,1,1],[0,2,1],[2,2,0]],"solution":[4,4],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"先に道を開けよう","chapter":"02 奥行き","weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"shot"}],"blue":[[0,2,1],[1,2,1],[2,2,1],[1,0,1]],"purple":[],"gold":[[2,2,2],[0,0,1],[0,1,2],[2,0,0],[0,2,0]],"solution":[7,4],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"長方形","chapter":"05 形が変わる","dims":[4,2,2],"shape":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[2,0,0],[2,0,1],[2,1,0],[2,1,1],[3,0,0],[3,0,1],[3,1,0],[3,1,1]],"weapons":[{"axis":"x","type":"laser"},{"axis":"z","type":"laser"},{"axis":"y","type":"shot"}],"blue":[[0,0,0],[1,0,0],[2,0,0],[3,0,0],[3,0,1],[3,1,1]],"purple":[],"gold":[[0,0,1],[0,1,0],[0,1,1],[1,0,1],[1,1,0],[1,1,1],[2,0,1],[2,1,0],[2,1,1],[3,1,0]],"solution":[0,6,7]},{"title":"長いブロック","chapter":"05 形が変わる","dims":[2,2,4],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,0,3],[0,1,0],[0,1,1],[0,1,2],[0,1,3],[1,0,0],[1,0,1],[1,0,2],[1,0,3],[1,1,0],[1,1,1],[1,1,2],[1,1,3]],"weapons":[{"axis":"z","type":"laser"},{"axis":"x","type":"shot"},{"axis":"x","type":"laser"}],"blue":[[0,1,0],[1,0,3],[1,1,0],[1,1,1],[1,1,2],[1,1,3]],"purple":[],"gold":[[0,0,0],[0,0,1],[0,0,2],[0,0,3],[0,1,1],[0,1,2],[0,1,3],[1,0,0],[1,0,1],[1,0,2]],"solution":[3,3,4]},{"title":"L字の奥","chapter":"05 形が変わる","dims":[4,3,2],"shape":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[2,0,0],[2,0,1],[3,0,0],[3,0,1]],"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"shot"}],"blue":[[0,2,0],[1,1,1],[1,2,0],[3,0,0]],"purple":[],"gold":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,1],[1,0,0],[1,0,1],[1,1,0],[1,2,1],[2,0,0],[2,0,1],[3,0,1]],"solution":[4,6,4]},{"title":"L字の抜け道","chapter":"05 形が変わる","dims":[4,3,2],"shape":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[2,0,0],[2,0,1],[3,0,0],[3,0,1]],"weapons":[{"axis":"y","type":"laser"},{"axis":"z","type":"shot"},{"axis":"x","type":"laser"}],"blue":[[0,2,0],[1,2,0],[1,2,1],[3,0,1]],"purple":[],"gold":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[2,0,0],[2,0,1],[3,0,0]],"solution":[7,5,4]},{"title":"つらぬいて、2連射","chapter":"02 奥行き","weapons":[{"axis":"x","type":"laser"},{"axis":"z","type":"shot"},{"axis":"z","type":"shot"}],"blue":[[0,0,0],[1,0,0],[2,0,0],[1,2,2],[1,2,1]],"purple":[],"gold":[[2,2,0],[0,2,2],[0,1,2],[2,2,1],[2,0,1]],"solution":[0,5,5],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"奥から順番に","chapter":"02 奥行き","weapons":[{"axis":"x","type":"shot"},{"axis":"x","type":"shot"},{"axis":"y","type":"laser"}],"blue":[[2,1,0],[1,1,0],[0,0,2],[0,1,2],[0,2,2]],"purple":[],"gold":[[1,1,2],[1,2,1],[2,0,0],[0,0,0],[2,2,1]],"solution":[3,3,2],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"最後の1個を狙え","chapter":"03 三次元","weapons":[{"axis":"z","type":"laser"},{"axis":"x","type":"laser"},{"axis":"y","type":"shot"}],"blue":[[0,1,0],[0,1,1],[0,1,2],[0,2,2],[1,2,2],[2,2,2],[2,0,1]],"purple":[],"gold":[[0,0,1],[2,2,0],[1,2,0],[0,0,2],[1,1,2]],"solution":[1,8,7],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"奥に続く道","chapter":"03 三次元","weapons":[{"axis":"z","type":"shot"},{"axis":"z","type":"shot"},{"axis":"x","type":"laser"}],"blue":[[0,2,2],[0,2,1],[0,1,0],[1,1,0],[2,1,0]],"purple":[],"gold":[[1,1,2],[2,2,1],[2,1,2],[2,0,2],[0,1,1]],"solution":[2,2,3],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"T字の交差","chapter":"06 立体の形","dims":[3,4,2],"shape":[[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[2,1,0],[2,1,1]],"weapons":[{"axis":"y","type":"laser"},{"axis":"x","type":"laser"},{"axis":"z","type":"shot"}],"blue":[[1,0,0],[1,1,0],[1,1,1],[1,2,0],[1,3,0],[1,3,1]],"purple":[],"gold":[[0,1,0],[0,1,1],[1,0,1],[1,2,1],[2,1,0],[2,1,1]],"solution":[2,7,5]},{"title":"T字の2連射","chapter":"06 立体の形","dims":[3,4,2],"shape":[[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[1,3,0],[1,3,1],[2,1,0],[2,1,1]],"weapons":[{"axis":"z","type":"shot"},{"axis":"z","type":"shot"},{"axis":"y","type":"laser"}],"blue":[[1,0,1],[1,1,0],[1,1,1],[1,2,1],[1,3,1]],"purple":[],"gold":[[0,1,0],[0,1,1],[1,0,0],[1,2,0],[1,3,0],[2,1,0],[2,1,1]],"solution":[5,5,3]},{"title":"階段を通せ","chapter":"06 立体の形","dims":[4,2,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[2,0,0],[2,0,1],[2,1,0],[2,1,1],[3,0,0],[3,1,0]],"weapons":[{"axis":"x","type":"laser"},{"axis":"z","type":"laser"},{"axis":"y","type":"shot"}],"blue":[[0,1,0],[1,1,0],[2,0,1],[2,1,0],[2,1,1],[3,1,0]],"purple":[],"gold":[[0,0,0],[0,0,1],[0,0,2],[0,1,1],[0,1,2],[1,0,0],[1,0,1],[1,0,2],[1,1,1],[1,1,2],[2,0,0],[3,0,0]],"solution":[3,5,7]},{"title":"階段の一番奥","chapter":"06 立体の形","dims":[4,2,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[2,0,0],[2,0,1],[2,1,0],[2,1,1],[3,0,0],[3,1,0]],"weapons":[{"axis":"z","type":"shot"},{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"shot"}],"blue":[[0,0,2],[1,0,2],[1,1,2],[2,1,0],[2,1,1]],"purple":[],"gold":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,1,2],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[2,0,0],[2,0,1],[3,0,0],[3,1,0]],"solution":[5,2,5,5]},{"title":"X・Y・Zを組み合わせる","chapter":"03 三次元","weapons":[{"axis":"z","type":"laser"},{"axis":"x","type":"shot"},{"axis":"y","type":"laser"}],"blue":[[1,1,0],[1,1,1],[1,1,2],[2,0,2],[0,0,0],[0,1,0],[0,2,0]],"purple":[],"gold":[[1,2,2],[1,0,0],[0,1,1],[2,0,0],[2,2,1]],"solution":[4,2,0],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"二度撃つ理由","chapter":"04 段取り","weapons":[{"axis":"x","type":"shot"},{"axis":"z","type":"laser"},{"axis":"x","type":"shot"}],"blue":[[2,0,0],[1,0,0],[0,2,0],[0,2,1],[0,2,2]],"purple":[],"gold":[[1,1,0],[2,1,1],[2,0,1],[1,1,2],[0,1,2]],"solution":[0,2,0],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"交わって初めて","chapter":"04 段取り","weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"shot"}],"blue":[[1,2,2],[2,2,2],[0,0,2],[0,1,2],[2,0,1]],"purple":[[0,2,2]],"gold":[[0,2,0],[1,0,0],[2,1,2],[1,0,2],[0,1,0]],"solution":[8,2,6],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]},{"title":"4手先を組み立てろ","chapter":"04 段取り","weapons":[{"axis":"z","type":"shot"},{"axis":"y","type":"laser"},{"axis":"x","type":"laser"},{"axis":"z","type":"shot"}],"blue":[[2,2,2],[2,2,1],[0,0,0],[0,1,0],[0,2,0],[0,0,1],[1,0,1],[2,0,1]],"purple":[],"gold":[[2,1,2],[2,1,1],[1,1,0],[1,2,0],[1,1,2]],"solution":[8,0,1,8],"dims":[3,3,3],"shape":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]]}];
-const AXES=['x','y','z'];
-const $=id=>document.getElementById(id);
-const board=$('board'), canvas=$('cube'),ctx=canvas.getContext('2d',{alpha:true});
-let W=0,H=0,DPR=1,scale=46, cx=0,cy=0;
-const defaultYaw=.72, defaultPitch=.65;
-let camR=[0,1,0],camU=[0,0,1],camF=[1,0,0],viewTarget=null;
-const vdot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
-const vcross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
-const vnorm=a=>{const d=Math.hypot(...a)||1;return a.map(x=>x/d)};
-const vrot=(v,axis,theta)=>{const c=Math.cos(theta),s=Math.sin(theta),dot=vdot(v,axis),cross=vcross(axis,v);return v.map((x,i)=>x*c+cross[i]*s+axis[i]*dot*(1-c))};
-function standardCamera(){const yaw=defaultYaw,pitch=defaultPitch,c=Math.cos(pitch),s=Math.sin(pitch),cy=Math.cos(yaw),sy=Math.sin(yaw);
- return {r:[-sy,cy,0],u:[-s*cy,-s*sy,c],f:[c*cy,c*sy,s]}}
-function setCameraDefault(){const o=standardCamera();camR=o.r;camU=o.u;camF=o.f;viewTarget=null}
-function straightenCamera(){camF=vnorm(camF);camR=vnorm(vcross(camU,camF));camU=vnorm(vcross(camF,camR))}
-function orbitCamera(dx,dy){viewTarget=null;const ay=-dx*.010,ax=dy*.010;
- const pivotU=camU.slice();camR=vrot(camR,pivotU,ay);camF=vrot(camF,pivotU,ay);
- const pivotR=camR.slice();camU=vrot(camU,pivotR,ax);camF=vrot(camF,pivotR,ax);straightenCamera()}
-function focusVisible(){const axis=getLevel().weapons[activeGun]?.axis;if(!axis)return;const i=AXES.indexOf(axis);
- if(camF[i]<.18)viewTarget=standardCamera()}
-setCameraDefault();
-let stageIndex=0,highest=0,soundOn=true, audio=null, won=false, fired=false,resolved=false,fireTime=0,fireReport=null,hintIndex=-1,tries=0,serial=0;
-let chosen=[],hitPorts=[],pointer=null,particles=[],laserFlash=0,frame=0,activeGun=0;
-const storeKey='LASER_CUBE_M03';
-try{const saved=JSON.parse(localStorage.getItem(storeKey)||'{}');highest=Math.max(0,Math.min(LEVELS.length-1,Number(saved.highest)||0));stageIndex=Math.max(0,Math.min(highest,Number(saved.stage)||0));soundOn=saved.sound!==false}catch(e){}
-const pos=(a,b,c)=>[a,b,c];
-const k=p=>p.join(',');
-const cval=(a,b,c)=>`rgba(${a},${b},${c},1)`;
-function save(){try{localStorage.setItem(storeKey,JSON.stringify({highest,stage:stageIndex,sound:soundOn}))}catch(e){}}
-function getLevel(){return LEVELS[stageIndex]}
-function gunType(w){return w.type==='laser'?'LASER':'SHOT'}
-// Musical design: isolated sine notes, no detuned oscillators or clashing simultaneous pitches.
-function playingTone(freq,dur=.07,type='sine',gain=.028,when=0){if(!soundOn)return;try{
- audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();
- const t=audio.currentTime+when,osc=audio.createOscillator(),env=audio.createGain();osc.type=type;
- osc.frequency.setValueAtTime(freq,t);env.gain.setValueAtTime(0,t);
- env.gain.linearRampToValueAtTime(gain,t+.008);env.gain.exponentialRampToValueAtTime(.0001,t+dur);
- osc.connect(env).connect(audio.destination);osc.start(t);osc.stop(t+dur+.012);
- }catch(e){}}
-function tick(){playingTone(587.33,.035,'sine',.022)}
-function fireSound(w){playingTone(w.type==='shot'?392:523.25,w.type==='shot'?.065:.095,'sine',.031)}
-function winSound(){[[523.25,0],[659.26,.13],[783.99,.26]].forEach(([f,t])=>playingTone(f,.105,'sine',.034,t))}
-function failSound(){playingTone(329.63,.075,'sine',.026)}
-function viewDir(){return camF}
-function proj(p){return {x:cx+vdot(camR,p)*scale,y:cy-vdot(camU,p)*scale,d:vdot(camF,p)}}
-function line(a,b,color,width=1,alpha=1,dash=[]){ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
-function poly(points,fill,stroke,width=1,alpha=1){ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
-function dot(p,r,color,alpha=1,stroke){ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);if(color){ctx.fillStyle=color;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.1;ctx.stroke()}ctx.restore()}
-function lerp(a,b,t){return a+(b-a)*t}
-function dims(){return getLevel().dims||[3,3,3]}
-function centerCell(p){const d=dims();return p.map((x,i)=>x-(d[i]-1)*.5)}
-function volumeSet(){return new Set(getLevel().shape.map(k))}
-function lanes(axis){const a=AXES.indexOf(axis),others=[0,1,2].filter(i=>i!==a),d=dims();return d[others[0]]*d[others[1]]}
-function portValid(axis,index){const shape=volumeSet();return beamCells({axis},index).some(p=>shape.has(k(p)))}
-function faceDepth(axis,index){const a=AXES.indexOf(axis),shape=volumeSet(),live=beamCells({axis},index).filter(p=>shape.has(k(p)));return live.length?Math.max(...live.map(p=>p[a]))-(dims()[a]-1)*.5:NaN}
-function vbox(){return [-1.49,1.49]}
-function planePoint(axis,c,a,b){const p=[0,0,0],i=AXES.indexOf(axis),others=[0,1,2].filter(j=>j!==i);p[i]=c;p[others[0]]=a;p[others[1]]=b;return p}
-function laneFor(axis,index){const d=dims(),a=AXES.indexOf(axis),others=[0,1,2].filter(j=>j!==a);return [Math.floor(index/d[others[1]]),index%d[others[1]]]}
-function beamCells(w,index){const axis=w.axis,a=AXES.indexOf(axis),d=dims(),[u,v]=laneFor(axis,index),others=[0,1,2].filter(j=>j!==a);
- if(index<0||u<0||u>=d[others[0]]||v<0||v>=d[others[1]])return [];
- return Array.from({length:d[a]},(_,i)=>{const p=[0,0,0];p[a]=i;p[others[0]]=u;p[others[1]]=v;return p});}
-function axisPortPos(axis,index,offset=.16){const [u,v]=laneFor(axis,index),d=dims(),a=AXES.indexOf(axis),others=[0,1,2].filter(j=>j!==a);return planePoint(axis,faceDepth(axis,index)+.5+offset,u-(d[others[0]]-1)/2,v-(d[others[1]]-1)/2)}
-function beamWorld(axis,index,t){const [u,v]=laneFor(axis,index),d=dims(),a=AXES.indexOf(axis),others=[0,1,2].filter(j=>j!==a);return planePoint(axis,t,u-(d[others[0]]-1)/2,v-(d[others[1]]-1)/2)}
-
-// Each weapon fires in its planned order. SHOT stops at the nearest surviving block,
-// while LASER passes through all blocks; purple needs two hits across turns.
-function evaluate(level,aims){
- const blocks=new Map();for(const p of level.blue)blocks.set(k(p),{kind:'blue',hp:1});
- for(const p of level.purple)blocks.set(k(p),{kind:'purple',hp:2});
- for(const p of level.gold)blocks.set(k(p),{kind:'gold',hp:99});
- const snapshots=[takeSnapshot()],steps=[],broken=[],hurt=[];
- function takeSnapshot(){return [...blocks].map(([key,b])=>({key,p:key.split(',').map(Number),kind:b.kind,hp:b.hp}))}
+const LEVELS=[{"title":"一本の光","shape":"mini","dims":[2,2,2],"cells":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],"blue":[[0,1,0],[0,1,1]],"gold":[[0,0,1],[1,0,0],[1,0,1],[1,1,1]],"weapons":["laser"],"solutionCount":1,"exampleSolution":[["laser",[2,0,1]]]},{"title":"一個だけ","shape":"box","dims":[3,2,2],"cells":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[2,0,0],[2,0,1],[2,1,0],[2,1,1]],"blue":[[0,1,0]],"gold":[[0,0,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],"weapons":["shot"],"solutionCount":3,"exampleSolution":[["shot",[0,-1,1,0]]]},{"title":"貫通と一撃","shape":"box","dims":[3,2,2],"cells":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[2,0,0],[2,0,1],[2,1,0],[2,1,1]],"blue":[[0,1,0],[1,0,1],[1,1,1]],"gold":[[0,0,0],[0,0,1],[0,1,1],[1,1,0],[2,0,0],[2,1,0]],"weapons":["laser","shot"],"solutionCount":3,"exampleSolution":[["laser",[1,1,1]],["shot",[0,-1,1,0]]]},{"title":"違う面から","shape":"cube","dims":[3,3,3],"cells":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]],"blue":[[0,0,0],[0,1,0],[1,0,0],[1,1,0],[2,0,0],[2,1,0]],"gold":[[0,0,1],[0,0,2],[0,1,1],[0,1,2],[0,2,0],[0,2,2],[1,0,1],[1,0,2],[1,1,1],[1,2,0],[1,2,1],[1,2,2],[2,0,1],[2,0,2],[2,1,2],[2,2,1],[2,2,2]],"weapons":["laser","laser"],"solutionCount":1,"exampleSolution":[["laser",[0,0,0]],["laser",[0,1,0]]]},{"title":"長い立体","shape":"long","dims":[4,2,2],"cells":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[2,0,0],[2,0,1],[2,1,0],[2,1,1],[3,0,0],[3,0,1],[3,1,0],[3,1,1]],"blue":[[1,1,0],[3,0,0],[3,1,0]],"gold":[[0,0,0],[0,1,0],[1,0,1],[1,1,1],[2,0,0],[2,0,1],[2,1,0],[2,1,1]],"weapons":["laser","shot"],"solutionCount":3,"exampleSolution":[["laser",[1,3,0]],["shot",[1,1,1,0]]]},{"title":"Lの曲がり角","shape":"L","dims":[3,3,2],"cells":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[1,0,0],[1,0,1],[2,0,0],[2,0,1]],"blue":[[0,0,1],[0,1,0],[0,1,1]],"gold":[[0,0,0],[0,2,1],[1,0,0],[1,0,1],[2,0,0]],"weapons":["laser","shot"],"solutionCount":3,"exampleSolution":[["laser",[2,0,1]],["shot",[0,-1,0,1]]]},{"title":"Tのかたち","shape":"T","dims":[3,3,2],"cells":[[0,0,0],[0,0,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[2,0,0],[2,0,1]],"blue":[[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1]],"gold":[[0,0,1],[2,0,0],[2,0,1]],"weapons":["laser","laser"],"solutionCount":1,"exampleSolution":[["laser",[1,1,0]],["laser",[1,1,1]]]},{"title":"3発で仕留める","shape":"cube","dims":[3,3,3],"cells":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]],"blue":[[0,0,2],[0,1,1],[1,0,2],[1,2,0],[1,2,1],[1,2,2],[2,0,2]],"gold":[[0,1,0],[0,1,2],[0,2,2],[1,0,1],[1,1,0],[1,1,1],[2,1,2],[2,2,0],[2,2,1]],"weapons":["laser","laser","shot"],"solutionCount":3,"exampleSolution":[["laser",[0,0,2]],["laser",[2,1,2]],["shot",[0,-1,1,1]]]},{"title":"横長の罠","shape":"wide","dims":[4,3,2],"cells":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[2,0,0],[2,0,1],[2,1,0],[2,1,1],[2,2,0],[2,2,1],[3,0,0],[3,0,1],[3,1,0],[3,1,1],[3,2,0],[3,2,1]],"blue":[[0,0,0],[0,0,1],[1,0,1],[1,1,1],[1,2,1],[3,2,1]],"gold":[[0,1,0],[0,1,1],[0,2,1],[1,2,0],[2,1,0],[3,0,0],[3,1,0],[3,2,0]],"weapons":["laser","laser","shot"],"solutionCount":4,"exampleSolution":[["laser",[1,1,1]],["laser",[2,0,0]],["shot",[0,1,2,1]]]},{"title":"階段の向こう","shape":"stairs","dims":[3,3,3],"cells":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[2,0,0],[2,0,1],[2,1,0],[2,1,1],[2,2,0],[2,2,1]],"blue":[[0,0,2],[0,1,0],[0,1,1],[0,1,2],[2,0,0],[2,1,0],[2,2,0]],"gold":[[0,0,0],[1,0,1],[1,1,0],[1,1,1],[1,1,2]],"weapons":["laser","laser","shot"],"solutionCount":5,"exampleSolution":[["laser",[1,2,0]],["laser",[2,0,1]],["shot",[0,1,0,2]]]},{"title":"裏側を読む","shape":"L","dims":[3,3,2],"cells":[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[0,2,0],[0,2,1],[1,0,0],[1,0,1],[2,0,0],[2,0,1]],"blue":[[0,1,0],[0,1,1],[1,0,0],[2,0,0],[2,0,1]],"gold":[[0,0,0],[0,2,1],[1,0,1]],"weapons":["laser","laser","shot"],"solutionCount":4,"exampleSolution":[["laser",[2,0,1]],["laser",[2,2,0]],["shot",[0,1,0,0]]]},{"title":"同じ3発、別の道","shape":"T","dims":[3,3,2],"cells":[[0,0,0],[0,0,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1],[1,2,0],[1,2,1],[2,0,0],[2,0,1]],"blue":[[0,0,1],[1,0,1],[1,1,0],[1,2,0],[1,2,1],[2,0,1]],"gold":[[1,0,0]],"weapons":["laser","laser","shot"],"solutionCount":5,"exampleSolution":[["laser",[0,0,1]],["laser",[2,1,2]],["shot",[0,1,1,0]]]},{"title":"空洞の塔","shape":"tower","dims":[3,3,3],"cells":[[0,0,0],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,1,0],[2,1,1],[2,1,2],[2,2,0]],"blue":[[0,0,0],[0,1,0],[0,1,1],[0,1,2],[1,0,0],[1,2,2],[2,0,0]],"gold":[[1,0,2],[1,1,0],[1,1,2],[1,2,1],[2,1,0],[2,1,1],[2,1,2]],"weapons":["laser","laser","shot"],"solutionCount":4,"exampleSolution":[["laser",[0,0,0]],["laser",[2,0,1]],["shot",[0,1,2,2]]]},{"title":"レーザーキューブ","shape":"cube","dims":[3,3,3],"cells":[[0,0,0],[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,1,2],[0,2,0],[0,2,1],[0,2,2],[1,0,0],[1,0,1],[1,0,2],[1,1,0],[1,1,1],[1,1,2],[1,2,0],[1,2,1],[1,2,2],[2,0,0],[2,0,1],[2,0,2],[2,1,0],[2,1,1],[2,1,2],[2,2,0],[2,2,1],[2,2,2]],"blue":[[0,0,1],[0,1,1],[0,1,2],[0,2,1],[1,1,2],[2,1,2],[2,2,0]],"gold":[[0,0,2],[0,1,0],[1,1,1],[1,2,0],[1,2,1],[2,0,2],[2,1,1]],"weapons":["laser","laser","shot"],"solutionCount":5,"exampleSolution":[["laser",[0,1,2]],["laser",[1,0,1]],["shot",[0,1,2,0]]]}];
+const $=id=>document.getElementById(id),canvas=$('scene'),arena=$('arena'),ctx=canvas.getContext('2d',{alpha:true});
+const AX=['x','y','z'];const TAU=Math.PI*2;
+let W=0,H=0,dpr=1,scale=36,cx=0,cy=0;
+const defaultYaw=.72,defaultPitch=.63;
+let yaw=defaultYaw,pitch=defaultPitch,targetView=null,stage=0,highest=0,soundOn=true,audio=null;
+let selected=0,aims=[],shotsDone=false,settled=false,success=false,report=null,startTime=0,frame=0,hitAreas=[],pointer=null,history=[];
+const KEY='LASER_CUBE_V05';
+try{const j=JSON.parse(localStorage.getItem(KEY)||'{}');stage=Math.max(0,Math.min(LEVELS.length-1,j.stage||0));highest=Math.max(0,Math.min(LEVELS.length-1,j.highest||0));soundOn=j.sound!==false}catch(e){}
+const key=p=>p.join(','),clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),mix=(a,b,t)=>a+(b-a)*t;
+const comp=d=>[d[0],d[1],d[2]];
+const getLevel=()=>LEVELS[stage];
+function save(){try{localStorage.setItem(KEY,JSON.stringify({stage,highest,sound:soundOn}))}catch(e){}}
+function audioTone(f,d=.07,vol=.027,when=0,fall=1){if(!soundOn)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const t=audio.currentTime+when,osc=audio.createOscillator(),gain=audio.createGain();osc.type='sine';osc.frequency.setValueAtTime(f,t);osc.frequency.exponentialRampToValueAtTime(f*fall,t+d);gain.gain.setValueAtTime(.0001,t);gain.gain.linearRampToValueAtTime(vol,t+.01);gain.gain.exponentialRampToValueAtTime(.0001,t+d);osc.connect(gain).connect(audio.destination);osc.start(t);osc.stop(t+d+.012)}catch(e){}}
+function tapSound(){audioTone(622,.045,.020)}
+function soundLaser(){audioTone(690,.23,.045,0,1.18)}
+function soundShot(){audioTone(260,.13,.065,0,.64)}
+function soundBreak(type){audioTone(type==='laser'?730:370,.09,.025,0,type==='laser'?1.06:.81)}
+function soundWin(){[[523.25,0],[659.26,.13],[783.99,.26]].forEach(([f,t])=>audioTone(f,.12,.047,t))}
+function soundFail(){audioTone(392,.12,.030,0,.82)}
+function origin(p){const d=getLevel().dims;return p.map((v,i)=>v-(d[i]-1)/2)}
+function camera(){const cp=Math.cos(pitch);return [Math.cos(yaw)*cp,Math.sin(yaw)*cp,Math.sin(pitch)]}
+function project(p){const cyaw=Math.cos(yaw),syaw=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);return{x:cx+(-syaw*p[0]+cyaw*p[1])*scale,y:cy+(sp*(cyaw*p[0]+syaw*p[1])-cp*p[2])*scale,depth:cp*(cyaw*p[0]+syaw*p[1])+sp*p[2]}}
+function point(axis,val,a,b){const others=[0,1,2].filter(i=>i!==axis),p=[0,0,0];p[axis]=val;p[others[0]]=a;p[others[1]]=b;return p}
+function faceP(aim,dist=.57){const d=getLevel().dims,other=[0,1,2].filter(i=>i!==aim.axis),p=[0,0,0];p[aim.axis]=aim.sign*(d[aim.axis]/2+dist-.5);p[other[0]]=aim.a-(d[other[0]]-1)/2;p[other[1]]=aim.b-(d[other[1]]-1)/2;return p}
+function isSameAim(a,b){return a&&b&&a.axis===b.axis&&a.sign===b.sign&&a.a===b.a&&a.b===b.b}
+function beamCells(aim){const d=getLevel().dims,o=[0,1,2].filter(i=>i!==aim.axis),out=[];for(let t=0;t<d[aim.axis];t++){const p=[0,0,0];p[aim.axis]=aim.sign>0?d[aim.axis]-1-t:t;p[o[0]]=aim.a;p[o[1]]=aim.b;out.push(p)}return out}
+function evaluate(level=LEVELS[stage],assigned=aims){const blocks=new Map();for(const p of level.blue)blocks.set(key(p),'blue');for(const p of level.gold)blocks.set(key(p),'gold');const snapshots=[new Set(blocks.keys())],steps=[];let damagedGold=false;
  for(let i=0;i<level.weapons.length;i++){
-  const w=level.weapons[i],aim=aims[i],a=AXES.indexOf(w.axis),line=beamCells(w,aim).sort((p,q)=>q[a]-p[a]);
-  const candidates=w.type==='laser'?line:line.filter(p=>blocks.has(k(p))).slice(0,1),hits=[],brokenNow=[],hurtNow=[];
-  for(const p of candidates){const key=k(p),block=blocks.get(key);if(!block)continue;
-   hits.push(key);
-   if(block.kind==='gold'){hurt.push(key);hurtNow.push(key);continue}
-   block.hp--;if(block.hp===0){blocks.delete(key);broken.push(key);brokenNow.push(key)}
-  }
-  steps.push({hits,broken:brokenNow,hurt:hurtNow});snapshots.push(takeSnapshot());
- }
- const missed=[...blocks].filter(([,b])=>b.kind!=='gold').map(([key])=>key);
- return {ok:!missed.length&&!hurt.length,broken,hurt,missed,steps,snapshots};
+ const aim=assigned[i];if(!aim){return null}const order=beamCells(aim),type=level.weapons[i],ray=type==='laser'?order:order.filter(p=>blocks.has(key(p))).slice(0,1),hits=[],broken=[],goldHit=[];
+ for(const p of ray){const id=key(p),cell=blocks.get(id);if(!cell)continue;hits.push(id);if(cell==='gold'){goldHit.push(id);damagedGold=true}else{broken.push(id);blocks.delete(id)}}
+ steps.push({type,aim,broken,goldHit,hits});snapshots.push(new Set(blocks.keys()));}
+ const blueLeft=[...blocks.keys()].filter(id=>blocks.get(id)==='blue');const wasted=steps.some(s=>s.broken.length===0);
+ return {ok:!damagedGold&&!blueLeft.length&&!wasted,blueLeft,goldHit:steps.flatMap(s=>s.goldHit),wasted,steps,snapshots};}
+function visible(p){return camera().reduce((s,v,i)=>s+p[i]*v,0)}
+function stroke(a,b,color,width=1,opacity=1,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=opacity;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
+function polygon(ps,fill,edge,width=1,opacity=1){ctx.save();ctx.globalAlpha=opacity;ctx.beginPath();ctx.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))ctx.lineTo(p.x,p.y);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
+function circle(p,r,fill,opacity=1,edge=null,width=1){ctx.save();ctx.globalAlpha=opacity;ctx.beginPath();ctx.arc(p.x,p.y,r,0,TAU);if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
+function print(p,t,color,size=12,weight=800){ctx.save();ctx.font=`${weight} ${size}px -apple-system, BlinkMacSystemFont, sans-serif`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,p.x,p.y);ctx.restore()}
+function resize(){const r=arena.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);dpr=Math.min(2.5,window.devicePixelRatio||1);canvas.width=W*dpr;canvas.height=H*dpr;const d=getLevel().dims;scale=Math.min(W/(.70*(d[0]+d[1])+1.8),H/(.57*(d[0]+d[1]+d[2])+2.85),80);cx=W*.50;cy=H*.52}
+function drawFrame(){const d=getLevel().dims,mins=d.map(v=>-v/2),maxs=d.map(v=>v/2);
+ for(let axis=0;axis<3;axis++){const o=[0,1,2].filter(i=>i!==axis);for(const x of [mins[o[0]],maxs[o[0]]])for(const y of [mins[o[1]],maxs[o[1]]]){const a=[0,0,0],b=[0,0,0];a[axis]=mins[axis];b[axis]=maxs[axis];a[o[0]]=b[o[0]]=x;a[o[1]]=b[o[1]]=y;stroke(project(a),project(b),'#b9d4cd',.9,.26)}}}
+function cubeFaces(c,kind,alpha=1,shrink=1){const o=origin(c),r=.49*shrink,dir=camera();const vert=(p)=>project([o[0]+p[0]*r,o[1]+p[1]*r,o[2]+p[2]*r]);
+ const faces=[{n:[0,0,1],v:[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],shade:0},{n:[0,1,0],v:[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],shade:1},{n:[1,0,0],v:[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]],shade:2},{n:[0,0,-1],v:[[-1,1,-1],[1,1,-1],[1,-1,-1],[-1,-1,-1]],shade:3},{n:[0,-1,0],v:[[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]],shade:1},{n:[-1,0,0],v:[[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]],shade:2}];
+ const palette=kind==='blue'?['#a1e7dc','#51c8bb','#24afa5','#19827d']:['#f8dbab','#e7b676','#cb9256','#a97945'];
+ for(const f of faces){if(f.n.reduce((v,x,i)=>v+x*dir[i],0)<.002)continue;polygon(f.v.map(vert),palette[f.shade],kind==='blue'?'#529c94':'#b58e65',.9,alpha)}
 }
-function resize(){const r=board.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);DPR=Math.min(window.devicePixelRatio||1,2.5);canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);canvas.style.width=W+'px';canvas.style.height=H+'px';const d=dims();scale=Math.min(W/Math.max(5.9,(d[0]+d[1])*.83+1.0),H/Math.max(5.8,d[2]*1.45+1.9),68);cx=W*.5;cy=H*.48}
-function cubeFaces(c,kind,removed=false,hp=2){const [x,y,z]=c, r=.455,dir=viewDir();const vertex=(a,b,d)=>proj([x+a*r,y+b*r,z+d*r]);const faceDefinitions=[{normal:[1,0,0],p:[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]],shade:2},{normal:[0,1,0],p:[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],shade:1},{normal:[0,0,1],p:[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],shade:0},{normal:[-1,0,0],p:[[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]],shade:2},{normal:[0,-1,0],p:[[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]],shade:1},{normal:[0,0,-1],p:[[-1,1,-1],[1,1,-1],[1,-1,-1],[-1,-1,-1]],shade:3}];
- const colors={blue:['#9cece4','#4cc8be','#23a99f','#177f81'],purple:['#d0bfee','#aa93d6','#8870bc','#655d91'],gold:['#f4e8d7','#ead3b7','#d7b58c','#bea080']};const cc=colors[kind];
- for(const f of faceDefinitions){if(f.normal.reduce((sum,a,i)=>sum+a*dir[i],0)<.04)continue;const ps=f.p.map(p=>vertex(...p));poly(ps,cc[f.shade],kind==='gold'?'#ae987a':kind==='purple'?'#9989bb':'#56aaa6',.9,removed?.15:.94)}
- if(kind==='purple'){const p=proj([x,y,z]);ctx.save();ctx.font=`800 ${Math.max(11,scale*.23)}px -apple-system,BlinkMacSystemFont,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.shadowColor='rgba(45,30,80,.2)';ctx.shadowBlur=2;ctx.fillText(String(hp),p.x,p.y);ctx.restore()}
+function currentTiming(now){if(!shotsDone)return {i:-1,progress:0};const t=Math.max(0,now-startTime);if(t>=aims.length*740)return {i:aims.length,progress:1,elapsed:t};return {i:Math.floor(t/740),progress:(t%740)/740,elapsed:t}}
+function drawSmashes(step,progress){if(!step||progress<.49)return;const c=step.type==='laser'?'#67c9b7':'#db9d62';const p=clamp((progress-.49)/.42,0,1);
+ for(const [cellIndex,id] of step.broken.entries()){
+ const at=project(origin(id.split(',').map(Number)));const amount=step.type==='laser'?9:7;
+ ctx.save();ctx.globalAlpha=Math.max(0,1-p);for(let j=0;j<amount;j++){const ang=(j/amount)*TAU+cellIndex*1.16;const dist=(8+13*p+(j%3)*3)*p;const x=at.x+Math.cos(ang)*dist,y=at.y+Math.sin(ang)*dist+6*p*p;const r=(step.type==='laser'?1.5:2.9)*(1-p*.55);ctx.fillStyle=c;if(step.type==='laser'){ctx.fillRect(x,y,r*1.1,r*2.1)}else{ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y+r);ctx.lineTo(x-r,y+r);ctx.fill()}}ctx.restore();}
 }
-function drawWire(){const set=volumeSet(),d=dims(),dd=viewDir();
- const norms=[[1,0,0],[0,1,0],[0,0,1],[-1,0,0],[0,-1,0],[0,0,-1]];
- const ps=[[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]], [[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]], [[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]], [[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]], [[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]], [[-1,1,-1],[1,1,-1],[1,-1,-1],[-1,-1,-1]]];
- // Thin wire surfaces follow the *actual* silhouette, including recesses of L/T/stairs.
- for(const raw of getLevel().shape){const base=centerCell(raw);for(let f=0;f<6;f++){
-  const dir=norms[f];if(dir.reduce((s,v,i)=>s+v*dd[i],0)<.04)continue;
-  const neighbor=raw.map((v,i)=>v+dir[i]);if(set.has(k(neighbor)))continue;
-  const corners=ps[f].map(p=>proj(base.map((v,i)=>v+p[i]*.49)));
-  poly(corners,'rgba(235,249,246,.046)','#b0cec8',.8,.37);
- }}
-}
-function drawShadow(){const center=proj([0,0,-dims()[2]/2-.35]);ctx.save();ctx.beginPath();ctx.ellipse(center.x,center.y+scale*.4,scale*Math.max(1.5,dims()[0]*.52),scale*.35,0,0,Math.PI*2);ctx.fillStyle='rgba(50,95,88,.045)';ctx.fill();ctx.restore()}
-const STEP_MS=660;
-function phaseTime(now){if(!fired)return {index:-1,passed:0,visible:0};
- const t=Math.max(0,now-fireTime),index=Math.min(getLevel().weapons.length-1,Math.floor(t/STEP_MS));
- return {index,passed:t%STEP_MS,visible:Math.min(getLevel().weapons.length,Math.floor((t+240)/STEP_MS))};
-}
-function previewEnd(i){const l=getLevel(),w=l.weapons[i],aim=chosen[i],idx=AXES.indexOf(w.axis);
- if(w.type==='laser')return -dims()[idx]/2-.18;
- const current=new Map([...l.blue.map(p=>[k(p),{kind:'blue',hp:1}]),...l.purple.map(p=>[k(p),{kind:'purple',hp:2}]),...l.gold.map(p=>[k(p),{kind:'gold',hp:99}])]);
- for(let h=0;h<i;h++){if(chosen[h]<0)continue;const q=l.weapons[h],a=AXES.indexOf(q.axis),ll=beamCells(q,chosen[h]).sort((p,s)=>s[a]-p[a]),hits=q.type==='shot'?ll.filter(p=>current.has(k(p))).slice(0,1):ll;
-  for(const p of hits){const item=current.get(k(p));if(item&&item.kind!=='gold'){item.hp--;if(item.hp<=0)current.delete(k(p))}}
- }
- const line=beamCells(w,aim).sort((p,s)=>s[idx]-p[idx]);const first=line.find(p=>current.has(k(p)));
- return first?first[idx]-(dims()[idx]-1)*.5+.5:-dims()[idx]/2-.18;
-}
-function drawBeams(now){const level=getLevel(),phase=phaseTime(now);
- level.weapons.forEach((w,i)=>{const sel=chosen[i];if(sel<0)return;
- const isShot=w.type==='shot',color=isShot?'#c68e52':'#13a49b',head=proj(axisPortPos(w.axis,sel,.46)),near=proj(axisPortPos(w.axis,sel,.14));
- const active=fired?i===phase.index:i===activeGun;
- if(!active){dot(near,3.1,color,.6);return}
- if(!fired){
-  const end=proj(beamWorld(w.axis,sel,previewEnd(i)));line(head,end,color,isShot?2.2:1.65,isShot?.56:.5,isShot?[]:[3,5]);
-  if(isShot){dot(end,5.4,'#fff',.8);dot(end,3.2,color,.92)}else{dot(end,2.2,color,.75)}
-  return;
- }
- if(phase.passed>400)return;
- const impacts=fireReport.steps[i].hits,idx=AXES.indexOf(w.axis);
- let end=-dims()[idx]/2-.25;
- if(isShot&&impacts.length){const p=impacts[0].split(',').map(Number);end=p[idx]-(dims()[idx]-1)*.5+.5}
- const tip=proj(beamWorld(w.axis,sel,end));const alpha=Math.min(1,phase.passed/70)*Math.min(1,(410-phase.passed)/120);
- line(head,tip,color,isShot?4:5,alpha);line(head,tip,'#fff',isShot?1:1.6,alpha*.85);
- });
-}
-function drawPorts(){hitPorts=[];const level=getLevel(),dir=viewDir();
- const active=level.weapons[activeGun];if(!active)return;
- const axis=active.axis,look=dir[AXES.indexOf(axis)];if(look<.10)return;
- const selected=chosen[activeGun],isShot=active.type==='shot',clr=isShot?'#c58e58':'#0b9e93';
- for(let j=0;j<lanes(axis);j++){
-  if(!portValid(axis,j))continue;
-  const p=proj(axisPortPos(axis,j,.15)),on=j===selected;
-  const r=Math.max(4,Math.min(5.5,scale*.092));
-  if(on){dot(p,r+7,'#fff',.93);dot(p,r+4,clr,1);dot(p,r-1,'#fff',1);
-   // Four reticle ticks visually connect the aim point to its cube face.
-   for(let t=0;t<4;t++){const a=Math.PI*t/2,inner=r+6,outer=r+10;line({x:p.x+Math.cos(a)*inner,y:p.y+Math.sin(a)*inner},{x:p.x+Math.cos(a)*outer,y:p.y+Math.sin(a)*outer},clr,1.5,.8)}
-  }else{dot(p,r+3,'#fff',.88);dot(p,r+1,'#b0cac3',.78,'#fff');dot(p,2.1,clr,.9)}
-  hitPorts.push({x:p.x,y:p.y,r:Math.max(15,scale*.30),wIndex:activeGun,j,depth:p.d});
+function drawCubes(timing){const l=getLevel(),before=shotsDone&&report?report.snapshots[Math.min(timing.i,report.steps.length)]:null,now=shotsDone&&report?report.snapshots[Math.min(timing.i+1,report.steps.length)]:null;
+ let active=new Set();if(shotsDone&&report&&timing.i>=0&&timing.i<report.steps.length){active=new Set(report.steps[timing.i].broken)}
+ const blocks=[...l.blue.map(p=>({p,kind:'blue'})),...l.gold.map(p=>({p,kind:'gold'}))];const d=camera();blocks.sort((a,b)=>visible(origin(a.p))-visible(origin(b.p)));
+ for(const b of blocks){const id=key(b.p),was=before?before.has(id):true;if(!was)continue;let alpha=1,shrink=1;
+ if(active.has(id)){const start=report.steps[timing.i].type==='shot'?.51:.38;const t=clamp((timing.progress-start)/.32,0,1);alpha=1-t;shrink=1-.34*t}
+ if(alpha>.02)cubeFaces(b.p,b.kind,alpha,shrink)}if(shotsDone&&report&&timing.i>=0&&timing.i<report.steps.length){drawSmashes(report.steps[timing.i],timing.progress);const s=report.steps[timing.i];if(s.goldHit.length&&timing.progress>.35&&timing.progress<.84){for(const id of s.goldHit){const p=project(origin(id.split(',').map(Number)));const f=clamp((timing.progress-.35)/.5,0,1);circle(p,scale*(.2+.22*f),null,(1-f)*.75,'#c07e56',2)}}}}
+function drawRay(now,t){const l=getLevel();if(!shotsDone){aims.forEach((aim,i)=>{if(!aim)return;const type=l.weapons[i],p=faceP(aim,.85),q=faceP(aim,.51);stroke(project(p),project(q),type==='laser'?'#139b90':'#d09a5d',2.8,i===selected?.9:.5)});return}
+ if(!report||t.i<0||t.i>=l.weapons.length)return;
+ const s=report.steps[t.i],aim=s.aim,type=s.type,d=l.dims,ax=aim.axis;
+ const start=faceP(aim,1.15),exit=faceP({...aim,sign:-aim.sign},.58);
+ const startPr=project(start),endPr=project(exit);
+ if(type==='laser'){
+ const f=clamp((t.progress-.10)/.24,0,1),fade=clamp((.83-t.progress)/.25,0,1);if(f<=0||fade<=0)return;
+ const dest={x:mix(startPr.x,endPr.x,f),y:mix(startPr.y,endPr.y,f)};
+ stroke(startPr,dest,'#159d94',9,fade*.16);stroke(startPr,dest,'#13c6b3',4.5,fade*.93);stroke(startPr,dest,'#eafff5',1.8,fade);circle(dest,3.2,'#fff',fade);
+ }else{
+ const hit=s.hits[0],p=hit?origin(hit.split(',').map(Number)):faceP({...aim,sign:-aim.sign},.50),dest=hit?p.map((v,j)=>j===ax?v+aim.sign*.46:v):p;
+ const progress=clamp((t.progress-.13)/.39,0,1),at=project(start.map((v,j)=>mix(v,dest[j],progress)));
+ if(t.progress<.62&&t.progress>.12){stroke(startPr,at,'#d89b55',7,.17);stroke(startPr,at,'#d39a59',2.7,.58);circle(at,9,'#f2d2a1',.20);circle(at,5.0,'#d89b59',.98);circle(at,2.3,'#fff5de',.99)}
+ if(t.progress>.50&&t.progress<.79&&hit){const c=project(dest),f=clamp((t.progress-.5)/.29,0,1);circle(c,7+17*f,null,1-f,'#d49a5a',2.6);circle(c,4+11*f,null,(1-f)*.6,'#edd6ad',1.2)}
  }
 }
-function drawAxisLabel(){/* axis is displayed on the weapon card, not floating around the cube */}
-function drawParticles(dt){for(const o of particles){o.x+=o.vx*dt;o.y+=o.vy*dt;o.vy+=40*dt;o.life-=dt;ctx.save();ctx.globalAlpha=Math.min(1,o.life*2.1);ctx.fillStyle=o.color;ctx.beginPath();ctx.arc(o.x,o.y,Math.max(.5,o.size*o.life),0,7);ctx.fill();ctx.restore()}particles=particles.filter(p=>p.life>0)}
-function render(now){frame=requestAnimationFrame(render);if(!W||!H)return;
- ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
- if(viewTarget){const target=viewTarget, mix=.16;
-  camR=camR.map((v,i)=>v*(1-mix)+target.r[i]*mix);
-  camU=camU.map((v,i)=>v*(1-mix)+target.u[i]*mix);
-  camF=camF.map((v,i)=>v*(1-mix)+target.f[i]*mix);
-  straightenCamera();if(vdot(camF,target.f)>.9997&&vdot(camU,target.u)>.9997){camR=target.r.slice();camU=target.u.slice();camF=target.f.slice();viewTarget=null}
+function inPoly(pt,ps){let inside=false;for(let i=0,j=ps.length-1;i<ps.length;j=i++){const a=ps[i],b=ps[j];if(((a.y>pt.y)!==(b.y>pt.y))&&(pt.x<(b.x-a.x)*(pt.y-a.y)/(b.y-a.y)+a.x))inside=!inside}return inside}
+function drawnAims(){const d=getLevel().dims;
+ for(let i=0;i<aims.length;i++){const aim=aims[i];if(!aim)continue;const type=getLevel().weapons[i],p=project(faceP(aim,.535));const isFront=camera()[aim.axis]*aim.sign>.05;if(!isFront)continue;const active=i===selected&&!shotsDone,color=type==='laser'?'#129e91':'#c78e51';
+ circle(p,active?13:10,'#fff',.92,color,active?2.5:1.8);if(type==='laser'){stroke({x:p.x-5,y:p.y},{x:p.x+5,y:p.y},color,2,1);circle(p,2.3,color)}else{circle(p,4.2,color,1)}print({x:p.x+11,y:p.y-11},String(i+1),'#5d827b',9,900);}
+}
+function drawFaceTargets(){hitAreas=[];if(shotsDone)return;const d=getLevel().dims,dir=camera();
+ for(let axis=0;axis<3;axis++)for(const sign of [-1,1]){
+ if(dir[axis]*sign<.14)continue;
+ const other=[0,1,2].filter(i=>i!==axis),A=d[other[0]],B=d[other[1]];
+ for(let a=0;a<A;a++)for(let b=0;b<B;b++){
+ const aim={axis,sign,a,b},mid=faceP(aim,.54),corners=[[-.49,-.49],[.49,-.49],[.49,.49],[-.49,.49]].map(([u,v])=>{const p=mid.slice();p[other[0]]+=u;p[other[1]]+=v;return project(p)});
+ const sel=isSameAim(aim,aims[selected]);
+ polygon(corners,sel?'rgba(37,173,155,.15)':'rgba(255,255,255,.095)',sel?'rgba(25,152,142,.42)':'rgba(134,180,171,.16)',.75,1);
+ const p=project(mid);if(!sel){circle(p,Math.max(2.1,scale*.06),'#fff',.85,'rgba(108,159,150,.32)',.8)}
+ hitAreas.push({aim,corners,depth:p.depth,center:p});
  }
- drawShadow();drawWire();
- const level=getLevel(),phase=phaseTime(now);
- const data=(fired&&fireReport?fireReport.snapshots[phase.visible]:[
-  ...level.gold.map(p=>({p,kind:'gold',hp:99})),...level.blue.map(p=>({p,kind:'blue',hp:1})),...level.purple.map(p=>({p,kind:'purple',hp:2}))]).slice();
- const d=viewDir();data.sort((a,b)=>a.p.reduce((s,x,i)=>s+x*d[i],0)-b.p.reduce((s,x,i)=>s+x*d[i],0));
- for(const cell of data){cubeFaces(centerCell(cell.p),cell.kind,false,cell.hp);
-  if(resolved && !won && cell.kind==='gold' && fireReport.hurt.includes(k(cell.p))){const hit=proj(centerCell(cell.p));dot(hit,scale*.19,'#ce795c',.88,'#fff')}
  }
- drawBeams(now);if(!fired)drawPorts();else hitPorts=[];drawAxisLabel();drawParticles(1/60);
+ drawnAims();}
+function drawShadow(){const base=project([0,0,-getLevel().dims[2]/2-.65]);ctx.save();ctx.fillStyle='rgba(64,103,92,.035)';ctx.beginPath();ctx.ellipse(base.x,base.y+12,scale*1.8,scale*.4,0,0,TAU);ctx.fill();ctx.restore()}
+function draw(now){frame=requestAnimationFrame(draw);if(!W||!H)return;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(targetView){yaw=mix(yaw,targetView[0],.14);pitch=mix(pitch,targetView[1],.14);if(Math.abs(yaw-targetView[0])+Math.abs(pitch-targetView[1])<.002)targetView=null}
+ drawShadow();drawFrame();const t=currentTiming(now);drawCubes(t);drawRay(now,t);drawFaceTargets();if(shotsDone)drawnAims();}
+function weaponIcon(type){return type==='laser'?`<svg viewBox="0 0 28 28" aria-hidden="true"><g fill="none" stroke="#78b5ac" stroke-width="1.3"><rect x="2" y="8" width="8" height="12" rx="1.5"/><rect x="10" y="8" width="8" height="12" rx="1.5"/><rect x="18" y="8" width="8" height="12" rx="1.5"/></g><path d="M1 14h26" stroke="#119b90" stroke-width="2.6" stroke-linecap="round"/></svg>`:`<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="8" width="8" height="12" rx="1.5" fill="#e7c9a6" stroke="#ba915e" stroke-width="1.2"/><rect x="15" y="8" width="9" height="12" rx="1.5" fill="none" stroke="#d2dcd7" stroke-width="1.2"/><path d="M1 14h10" stroke="#ca8d4c" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="14" r="2.6" fill="#ca8d4c"/></svg>`}
+function hud(){const l=getLevel();$('count').textContent=String(stage+1).padStart(2,'0')+' / '+LEVELS.length;$('chapter').textContent=stage<3?'01 / 光と弾':stage<7?'02 / 方向を読む':'03 / 三手の設計';$('title').textContent=l.title;
+ $('subtitle').textContent=stage===0?'緑の光は、まっすぐ貫通する。':stage===1?'オレンジの弾は、手前の一個だけ。':'青をすべて消し、金色には当てない。';$('progress').style.width=(100*(stage+1)/LEVELS.length)+'%';$('prev').disabled=stage===0;$('next').disabled=stage>=highest;
+ $('loadout').innerHTML=l.weapons.map((type,i)=>`<button class="weapon ${type} ${i===selected?'selected':''} ${aims[i]?'done':''}" data-i="${i}" aria-label="${i+1}発目 ${type==='laser'?'レーザー貫通':'ショット単発'} ${aims[i]?'照準済':'未設定'}" ${shotsDone?'disabled':''}><span class="weapon-num">${i+1}</span><span class="weapon-icon">${weaponIcon(type)}</span><span class="weapon-copy"><span class="weapon-type">${type==='laser'?'レーザー':'ショット'}</span><span class="weapon-state">${aims[i]?'照準OK':i===selected?'面をタップ':'未設定'}</span></span></button>`).join('');
+ const ready=aims.every(Boolean);$('fireBtn').disabled=!ready&&!shotsDone;
+ $('fireBtn').classList.toggle('next',success);
+ $('fireBtn').textContent=success?(stage===LEVELS.length-1?'14問クリア！ ↻':'次のステージへ →'):shotsDone?(settled?'照準を直す':'射撃中…'):(ready?`${l.weapons.length} 発、発射する`:'面をタップして狙おう');
+ $('arenaHint').textContent=success?'狙いどおり。すべての青を消した。':shotsDone?(settled?'狙いを見直して、もう一度。':'レーザーとショットで消え方が違う'):aims.every(Boolean)?'どこから撃つか、最後に確認しよう':`「${l.weapons[selected]==='laser'?'レーザー：一直線に貫通':'ショット：最初の1個だけ'}」を選択中`;
+ $('resetBtn').textContent=shotsDone?'戻す':'照準クリア';
+ $('notice').classList.toggle('show',settled);$('notice').classList.toggle('bad',settled&&!success);
+ if(settled){$('noticeTitle').textContent=success?'CLEAR!':report.goldHit.length?'金色に当たった！':report.wasted?'空振りがあった！':'青が残った';$('noticeDesc').textContent=success?'考えた3本の射線が、ぴったり。':report.goldHit.length?'金色には当てず、青だけを消そう':report.wasted?'すべての武器を使って消そう':`${report.blueLeft.length}個、まだ残っている`}
 }
-function weaponGlyph(type){const c=type==='shot'?'#bd8a55':'#139d92';
- if(type==='laser')return `<svg class="gunsymbol" viewBox="0 0 68 22" aria-hidden="true"><g fill="#e1f4ef" stroke="#96c8bc" stroke-width=".9"><rect x="10" y="4" width="13" height="14" rx="2"/><rect x="28" y="4" width="13" height="14" rx="2"/><rect x="46" y="4" width="13" height="14" rx="2"/></g><path d="M2 11H65" stroke="${c}" stroke-width="3" stroke-linecap="round"/><path d="M61 7l5 4-5 4" fill="none" stroke="${c}" stroke-width="1.8"/></svg>`;
- return `<svg class="gunsymbol" viewBox="0 0 68 22" aria-hidden="true"><g fill="#e1eee9" stroke="#baccc6" stroke-width=".9"><rect x="17" y="4" width="13" height="14" rx="2"/><rect x="35" y="4" width="13" height="14" rx="2"/><rect x="53" y="4" width="13" height="14" rx="2"/></g><rect x="17" y="4" width="13" height="14" rx="2" fill="#e3b77f" stroke="${c}" stroke-width="1"/><path d="M2 11H15" stroke="${c}" stroke-width="3" stroke-linecap="round"/><path d="M12 7l5 4-5 4" fill="none" stroke="${c}" stroke-width="1.8"/></svg>`;
+function show(i){stage=clamp(i,0,LEVELS.length-1);selected=0;aims=getLevel().weapons.map(()=>null);yaw=defaultYaw;pitch=defaultPitch;targetView=null;shotsDone=false;settled=false;success=false;report=null;history=[];hud();save();resize()}
+function setSelected(i){if(shotsDone)return;selected=i;tapSound();hud()}
+function setAim(i,aim){if(shotsDone)return;aims[i]={...aim};history.push({i,aim:{...aim}});tapSound();const next=aims.findIndex((a,j)=>!a&&j!==i);if(next>=0)selected=next;hud()}
+function nearestFace(x,y){const candidates=hitAreas.filter(a=>inPoly({x,y},a.corners));if(!candidates.length)return null;candidates.sort((a,b)=>b.depth-a.depth);return candidates[0].aim}
+function planFire(){if(success){if(stage<LEVELS.length-1)show(stage+1);else show(0);tapSound();return}
+ if(shotsDone){if(!settled)return;shotsDone=false;settled=false;report=null;hud();return}
+ if(aims.some(a=>!a))return;report=evaluate();if(!report)return;shotsDone=true;settled=false;startTime=performance.now();hud();const now=performance.now();
+ for(let i=0;i<aims.length;i++){setTimeout(()=>{if(!shotsDone)return;const s=report.steps[i];if(s.type==='laser')soundLaser();else soundShot();setTimeout(()=>{if(shotsDone&&report)for(let j=0;j<Math.min(3,s.broken.length);j++)soundBreak(s.type)},340)},i*740)}
+ setTimeout(()=>{if(!shotsDone)return;settled=true;success=report.ok;if(success){highest=Math.max(highest,Math.min(LEVELS.length-1,stage+1));soundWin();save()}else soundFail();hud()},aims.length*740+100);
 }
-function ui(){const l=getLevel();
- $('chapter').textContent='CHAPTER '+l.chapter;
- $('stageNum').textContent=String(stageIndex+1).padStart(2,'0')+' / '+LEVELS.length;$('title').textContent=l.title;
- $('progress').style.width=(100*(stageIndex+1)/LEVELS.length)+'%';$('prev').disabled=stageIndex===0;$('nextStage').disabled=stageIndex>=highest;
- $('blueCount').textContent=l.blue.length; $('goldCount').textContent=l.gold.length;
- $('purpleHud').style.display=l.purple.length?'flex':'none';$('purpleCount').textContent=l.purple.length+' ×2';
- $('guns').style.setProperty('--shots',String(l.weapons.length));
- $('guns').innerHTML=l.weapons.map((w,i)=>{const hasAim=chosen[i]>=0,active=i===activeGun,laser=w.type==='laser';
- return `<button type="button" data-wi="${i}" ${fired?'disabled':''} class="gun ${laser?'isLaser':'isShot'} ${hasAim?'active':''} ${active?'selected':''}" aria-label="${i+1}手目 ${w.axis.toUpperCase()}方向 ${laser?'レーザー貫通':'ショット手前だけ'}">
- <span class="gunorder">${hasAim?'✓':i+1}</span><span class="gunpin"></span><span class="gunhead"><span class="gunletter">${w.axis.toUpperCase()}</span><span>${laser?'LASER':'SHOT'}</span></span>
- ${weaponGlyph(w.type)}<span class="gunlabel">${laser?'全部つらぬく':'手前の1個'}</span><span class="gunstate">${hasAim?'✓ 設定済み':active?'丸をタップ':'未設定'}</span></button>`}).join('');
- const current=l.weapons[activeGun]||l.weapons[0],laser=current.type==='laser',msg=laser?'一列すべて貫通':'最初のブロックだけ';
- $('weaponHint').textContent=(activeGun+1)+'発目   '+current.axis.toUpperCase()+'軸  '+(laser?'◆ LASER · 全部貫通':'● SHOT · 手前1個');
- $('weaponHint').classList.toggle('shot',!laser);
- $('fire').disabled=(!won&&!fired&&chosen.some(i=>i<0));$('fire').classList.toggle('next',won);
- $('fire').textContent=won?(stageIndex===LEVELS.length-1?'全'+LEVELS.length+'問クリア！ ↻':'次のステージ →'):fired?resolved?'照準を直す':'発射中…':chosen.every(i=>i>=0)?l.weapons.length+'発を実行  ·  FIRE':'照準を合わせよう';
- $('boardnote').style.opacity=fired?0:1;
- $('tip').textContent=won?'思いどおり！ 次の問題へ。':fired?resolved?'照準を変えて、もう一度。':'射撃中…':hintIndex>=0?'ヒントをセットしました。':'立体をドラッグで360°回転 · 丸をタップで照準';
- $('hint').textContent=hintIndex>=0?'ヒント表示中':'ヒント';$('hint').disabled=won||fired;
- $('result').classList.toggle('visible',resolved);$('result').classList.toggle('fail',resolved&&!won);
- if(resolved){$('resultTitle').textContent=won?(stageIndex===LEVELS.length-1?'ALL CLEAR!':'CLEAR!'):fireReport.hurt.length?'金色に命中！':'青が残った';
- $('resultSub').textContent=won?'計算通り。すべてを消した。':fireReport.hurt.length?'金色を避けられる順番を考えよう':'あと '+fireReport.missed.length+' 個、消せなかった';}
- $('desc').textContent=l.purple.length?'青は1発、紫は2発。金色は守る。':l.weapons.some(w=>w.type==='shot')?'緑は貫通、オレンジは手前だけ。順番がカギ。':'すべての青を消して、金色は守ろう。';
-}
-function show(i){serial++;stageIndex=Math.max(0,Math.min(LEVELS.length-1,i));setCameraDefault();
- chosen=getLevel().weapons.map(()=>-1);activeGun=0;won=false;fired=false;resolved=false;fireReport=null;hintIndex=-1;tries=0;particles=[];ui();resize();save()}
-function shoot(){if(won){if(stageIndex<LEVELS.length-1)show(stageIndex+1);else show(0);tick();return}
- if(fired){if(!resolved)return;fired=false;resolved=false;fireReport=null;hintIndex=-1;ui();tick();return}
- if(chosen.some(i=>i<0))return;
- const l=getLevel(),run=++serial;fireReport=evaluate(l,chosen);fired=true;resolved=false;fireTime=performance.now();tries++;ui();
- for(let i=0;i<l.weapons.length;i++)setTimeout(()=>{
-  if(!fired||run!==serial)return;fireSound(l.weapons[i]);
-  for(const key of fireReport.steps[i].broken){const p=centerCell(key.split(',').map(Number)),c=proj(p);
-   for(let j=0;j<7;j++){const theta=Math.random()*Math.PI*2,speed=20+Math.random()*56;
-    particles.push({x:c.x,y:c.y,vx:Math.cos(theta)*speed,vy:Math.sin(theta)*speed-10,life:.25+Math.random()*.26,size:1+Math.random()*2,color:'#47bbb0'})}}
- },i*STEP_MS+220);
- setTimeout(()=>{if(!fired||run!==serial)return;resolved=true;if(fireReport.ok){won=true;highest=Math.max(highest,Math.min(LEVELS.length-1,stageIndex+1));save();winSound()}else failSound();ui()},l.weapons.length*STEP_MS+240);
-}
-function hint(){if(fired||won)return;hintIndex=activeGun;const i=hintIndex,solution=getLevel().solution[i];chosen[i]=solution;const next=chosen.findIndex((v,j)=>v<0&&j!==i);if(next>=0){activeGun=next;focusVisible()}tick();ui();}
-function resetView(){viewTarget=standardCamera();tick()}
-function nearestPort(x,y,maxRadius=24){let nearest=null,dist=999;for(const p of hitPorts){const n=Math.hypot(p.x-x,p.y-y);if(n<dist&&n<maxRadius){nearest=p;dist=n}}return nearest}
-function chooseAt(x,y,advance=true,radius=24){const nearest=nearestPort(x,y,radius);
- if(nearest&&!fired){const changed=chosen[nearest.wIndex]!==nearest.j;chosen[nearest.wIndex]=nearest.j;hintIndex=-1;
-  if(advance){const next=chosen.findIndex((v,j)=>v<0&&j!==nearest.wIndex);if(next>=0){activeGun=next;focusVisible()}}
-  if(changed)tick();ui();return true;}return false;}
-canvas.addEventListener('pointerdown',e=>{
- pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};
- canvas.setPointerCapture(e.pointerId);
-});
-canvas.addEventListener('pointermove',e=>{
- if(!pointer||pointer.id!==e.pointerId)return;
- const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;
- pointer.px=e.clientX;pointer.py=e.clientY;
- if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>6)pointer.moved=true;
- if(pointer.moved)orbitCamera(dx,dy);
-});
-canvas.addEventListener('pointerup',e=>{
- if(!pointer||pointer.id!==e.pointerId)return;
- if(!pointer.moved){const r=canvas.getBoundingClientRect();chooseAt(e.clientX-r.left,e.clientY-r.top,true,Math.max(17,scale*.36))}
- pointer=null;
-});
-canvas.addEventListener('pointercancel',()=>pointer=null);
-$('guns').addEventListener('click',e=>{const b=e.target.closest('button[data-wi]');if(!b||fired)return;const i=Number(b.dataset.wi);if(i>=0){activeGun=i;const a=AXES.indexOf(getLevel().weapons[i].axis);focusVisible();tick();ui()}});$('fire').addEventListener('click',shoot);$('hint').addEventListener('click',hint);$('homeView').addEventListener('click',resetView);$('prev').addEventListener('click',()=>{if(fired&&!resolved)return;if(stageIndex>0){show(stageIndex-1);tick()}});$('nextStage').addEventListener('click',()=>{if(fired&&!resolved)return;if(stageIndex<highest){show(stageIndex+1);tick()}});
-function soundUi(){$('soundBtn').style.color=soundOn?'#448b85':'#afbbb7';$('soundBtn').setAttribute('aria-pressed',String(soundOn))}
-$('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;soundUi();save();tick()});soundUi();
-window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(board);
-show(stageIndex);resize();requestAnimationFrame(render);
-window.LASER_CUBE={LEVELS,show,evaluate,get chosen(){return chosen},setChosen(a){chosen=a.slice();ui()},shoot,get ports(){return hitPorts.map(p=>({x:p.x,y:p.y,wIndex:p.wIndex,j:p.j}))},get stage(){return stageIndex},get result(){return fireReport},get camera(){return {r:camR.slice(),u:camU.slice(),f:camF.slice()}},orbit:orbitCamera,focus:focusVisible};
+canvas.addEventListener('pointerdown',e=>{pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>7)pointer.moved=true;if(pointer.moved){targetView=null;yaw+=dx*.011;pitch-=dy*.010;}});
+canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.moved&&!shotsDone){const r=canvas.getBoundingClientRect(),a=nearestFace(e.clientX-r.left,e.clientY-r.top);if(a)setAim(selected,a)}pointer=null});canvas.addEventListener('pointercancel',()=>pointer=null);
+$('loadout').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)setSelected(Number(b.dataset.i))});
+$('fireBtn').addEventListener('click',planFire);
+$('resetBtn').addEventListener('click',()=>{if(shotsDone){shotsDone=false;settled=false;success=false;report=null;hud()}else{aims=getLevel().weapons.map(()=>null);selected=0;hud();tapSound()}});
+$('viewBtn').addEventListener('click',()=>{targetView=[defaultYaw,defaultPitch];tapSound()});
+function soundHud(){$('soundBtn').style.color=soundOn?'#418e84':'#b2bfba';$('soundBtn').setAttribute('aria-pressed',String(soundOn))}
+$('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;save();soundHud();tapSound()});
+$('prev').addEventListener('click',()=>{if(stage>0)show(stage-1)});$('next').addEventListener('click',()=>{if(stage<highest)show(stage+1)});
+window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(arena);
+show(Math.min(stage,highest));soundHud();requestAnimationFrame(draw);
+window.LASER_CUBE={LEVELS,show,evaluate,setAim,get aims(){return aims},get selected(){return selected},get stage(){return stage},get hitAreas(){return hitAreas},get camera(){return {yaw,pitch}},orbit(dx,dy){yaw+=dx;pitch+=dy},fire:planFire,get report(){return report},get settled(){return settled},get success(){return success},get shotsDone(){return shotsDone}};
 })();
 </script>
 </body></html>
