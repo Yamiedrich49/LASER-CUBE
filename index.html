@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f4f8f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>LASER CUBE — 空間を、撃ち抜け。</title>
+<style>
+:root{--paper:#f4f8f7;--ink:#16383e;--light:#809996;--mint:#109b92;--aqua:#55c7ba;--gold:#c79b62;--line:#dce9e5;--white:#fff;--shadow:0 13px 38px rgba(29,67,67,.075)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;min-height:100%;background:var(--paper);color:var(--ink);overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+button:active{transform:scale(.97)}button:disabled{opacity:.27;cursor:default}
+.app{width:min(100%,530px);height:100svh;height:100dvh;min-height:520px;margin:auto;padding:calc(env(safe-area-inset-top) + 10px) 17px calc(env(safe-area-inset-bottom) + 12px);display:flex;flex-direction:column;gap:10px}
+.top{display:flex;align-items:center;justify-content:space-between;min-height:38px;flex:none}
+.logo{font-weight:900;letter-spacing:.12em;font-size:18px;white-space:nowrap}.logo span{color:#1ba99d}
+.topbuttons{display:flex;gap:3px}.iconbtn{width:39px;height:39px;border:0;border-radius:13px;background:transparent;color:#78938e;display:grid;place-items:center}.iconbtn:active{background:#e3efeb}
+.iconbtn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.stage{padding:2px 2px 0;flex:none}
+.strap{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#75918d;font-size:10px;letter-spacing:.15em;font-weight:800}
+.stagenav{display:flex;align-items:center;gap:7px;color:#537b78;font-variant-numeric:tabular-nums;letter-spacing:.05em}.navbtn{border:none;background:transparent;color:#829f99;display:grid;place-items:center;width:20px;height:22px;font-size:19px;font-weight:400;padding:0}
+.progress{height:3px;border-radius:9px;background:#e0ebe7;margin-top:7px;overflow:hidden}.progress>i{display:block;height:100%;width:5%;background:linear-gradient(90deg,#79d6c6,#0f9c91);border-radius:9px;transition:width .3s}
+.stage h1{text-align:center;font-size:19px;font-weight:820;letter-spacing:.03em;margin:9px 0 0;line-height:1.25}
+.desc{text-align:center;font-size:11px;color:#88a19d;margin:6px 0 0;letter-spacing:.02em}
+.board{position:relative;flex:1 1 auto;min-height:245px;border:1px solid #deebe7;overflow:hidden;border-radius:27px;box-shadow:var(--shadow),inset 0 1px 0 white;background:radial-gradient(ellipse 78% 68% at 50% 45%,#fff 1%,#fafdfe 48%,#edf6f3 100%);touch-action:none;user-select:none;-webkit-user-select:none}
+#cube{width:100%;height:100%;display:block;touch-action:none;cursor:grab}#cube:active{cursor:grabbing}
+.hud{position:absolute;pointer-events:none;top:13px;left:15px;display:flex;gap:11px;align-items:center}
+.hudpiece{display:flex;align-items:center;gap:5px;color:#6d8b88;font-weight:760;font-size:10px;font-variant-numeric:tabular-nums;letter-spacing:.03em}
+.dot{width:9px;height:9px;border-radius:3px;display:inline-block;background:#32b4ab;box-shadow:0 0 0 2px #e0f3ed}.dot.gold{background:#d6a16a;box-shadow:0 0 0 2px #faf0e3}.dot.purple{background:#9781ca;box-shadow:0 0 0 2px #ece8f6}
+.boardnote{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:10px;color:#95aaa6;letter-spacing:.03em;pointer-events:none;transition:opacity .15s}
+.result{pointer-events:none;position:absolute;top:40px;left:50%;transform:translateX(-50%) translateY(-8px);width:max-content;max-width:91%;text-align:center;opacity:0;transition:opacity .25s,transform .25s;border:1px solid #e0eee9;box-shadow:0 10px 30px rgba(20,74,65,.1);border-radius:18px;padding:9px 18px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px)}
+.result.visible{opacity:1;transform:translateX(-50%) translateY(0)}.result strong{font-size:17px;font-weight:850;letter-spacing:.08em;color:#168f87}.result.fail strong{color:#bb8760}.result small{font-size:10px;color:#829a96;display:block;margin-top:3px}
+.panel{flex:none;display:flex;flex-direction:column;gap:9px}
+.gunrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.gun{min-height:61px;border-radius:16px;border:1px solid #dce9e6;background:rgba(255,255,255,.76);padding:9px 9px 8px;display:flex;align-items:center;gap:7px;position:relative;min-width:0}
+.gun.off{opacity:.3;background:transparent}.gun.active{background:#f8fffd;border-color:#7ccbc0;box-shadow:0 0 0 1px rgba(38,163,151,.12)}.gun.selected{border-color:#159b92;box-shadow:0 0 0 1px rgba(30,160,150,.26);background:#f7fffd}.gun:not(.off){cursor:pointer}
+.gunletter{font-size:17px;font-weight:900;color:#4b7776;line-height:1}.gun.active .gunletter{color:#078f86}
+.guncontent{min-width:0}.guntype{font-weight:780;font-size:11px;white-space:nowrap}.gunstate{color:#91aaa5;font-size:9px;margin-top:3px;white-space:nowrap}
+.gunpin{position:absolute;right:9px;top:9px;width:5px;height:5px;border-radius:100%;background:#cbdad5}.gun.active .gunpin{background:#1cae9d;box-shadow:0 0 0 3px #e4f5f1}
+.actions{display:flex;align-items:stretch;gap:9px;min-height:54px}
+.smallbtn{width:72px;border:1px solid #dbe8e4;background:#fafffd;border-radius:16px;font-size:12px;font-weight:770;color:#70908c}
+.firebtn{flex:1;border:0;border-radius:17px;font-size:15px;font-weight:850;letter-spacing:.1em;display:flex;justify-content:center;gap:10px;align-items:center;background:#118f89;color:#fff;box-shadow:0 9px 19px rgba(14,142,133,.22);transition:transform .12s,background .15s,box-shadow .15s}
+.firebtn:disabled{background:#b9d8d1;box-shadow:none;opacity:1}.firebtn:active{transform:scale(.985);box-shadow:0 3px 12px rgba(14,142,133,.2)}.firebtn.next{background:#147970}
+.tip{min-height:17px;text-align:center;font-size:10px;color:#91a9a5;line-height:1.4}
+@media(max-height:660px){.app{gap:6px;padding-top:calc(env(safe-area-inset-top) + 6px);padding-bottom:calc(env(safe-area-inset-bottom) + 6px)}.stage h1{font-size:17px;margin-top:6px}.desc{margin-top:3px}.gun{min-height:52px;padding:7px}.actions{min-height:49px}.panel{gap:7px}.gunstate{font-size:9px}.board{min-height:220px}}
+@media(max-width:345px){.gun{gap:5px;padding:7px 5px}.gunletter{font-size:15px}.guntype{font-size:10px}.gunstate{font-size:8px}.app{padding-left:10px;padding-right:10px}.logo{font-size:16px}}
+</style>
+</head>
+<body><main class="app">
+  <header class="top"><div class="logo">LASER <span>CUBE</span></div><div class="topbuttons">
+    <button class="iconbtn" id="homeView" aria-label="視点をもどす" title="視点をもどす"><svg viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 3 7"/><path d="M3 4v7h7"/></svg></button>
+    <button class="iconbtn" id="soundBtn" aria-label="音のオンオフ"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg></button>
+  </div></header>
+  <section class="stage"><div class="strap"><span id="chapter">CHAPTER 01 · 光の直線</span><div class="stagenav"><button class="navbtn" id="prev" aria-label="前の問題">‹</button><span id="stageNum">01 / 20</span><button class="navbtn" id="nextStage" aria-label="次の問題">›</button></div></div><div class="progress"><i id="progress"></i></div><h1 id="title">レーザーを1本、合わせよう</h1><p class="desc" id="desc">青をすべて消して、金色は残す。</p></section>
+  <section class="board" id="board" aria-label="3Dキューブの射撃パズル"><canvas id="cube"></canvas>
+    <div class="hud"><div class="hudpiece"><i class="dot"></i><span id="blueCount">3</span></div><div class="hudpiece" id="purpleHud" style="display:none"><i class="dot purple"></i><span id="purpleCount">1 × 2</span></div><div class="hudpiece"><i class="dot gold"></i><span id="goldCount">4</span></div></div>
+    <div class="result" id="result"><strong id="resultTitle">CLEAR!</strong><small id="resultSub">すべての青に命中</small></div>
+    <div class="boardnote" id="boardnote">面の丸をタップして照準を合わせる · ドラッグで回転</div>
+  </section>
+  <section class="panel"><div class="gunrow" id="guns"></div><div class="actions"><button class="smallbtn" id="hint">ヒント</button><button class="firebtn" id="fire" disabled>照準を合わせよう</button></div><div class="tip" id="tip">丸を選んでから、まとめて撃とう。</div></section>
+</main>
+<script>
+'use strict';
+(()=>{
+const LEVELS=[{"weapons":[{"axis":"z","type":"laser"}],"blue":[[1,0,0],[1,0,1],[1,0,2]],"purple":[],"gold":[[0,1,2],[0,2,1],[1,1,2],[2,1,2]],"solution":[3],"title":"レーザーを1本、合わせよう","chapter":"光の直線"},{"weapons":[{"axis":"x","type":"laser"}],"blue":[[0,0,2],[1,0,2],[2,0,2]],"purple":[],"gold":[[0,2,1],[1,2,2],[2,1,1],[2,1,2]],"solution":[2],"title":"横から3個、一直線に","chapter":"光の直線"},{"weapons":[{"axis":"y","type":"laser"}],"blue":[[2,0,0],[2,1,0],[2,2,0]],"purple":[],"gold":[[0,0,1],[1,1,2],[1,2,2],[2,0,2],[2,1,2],[2,2,2]],"solution":[6],"title":"別の方向から狙おう","chapter":"光の直線"},{"weapons":[{"axis":"z","type":"laser"}],"blue":[[0,2,0],[0,2,1],[0,2,2]],"purple":[],"gold":[[0,1,0],[0,1,2],[1,1,0],[2,0,1],[2,2,0],[2,2,1]],"solution":[2],"title":"金色は壊さない","chapter":"光の直線"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,2,2],[1,2,2],[2,1,0],[2,1,1],[2,1,2],[2,2,2]],"purple":[],"gold":[[0,1,2],[1,0,0],[1,2,0]],"solution":[8,7],"title":"2つの方向から同時に","chapter":"直交する光"},{"weapons":[{"axis":"y","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,2,0],[0,2,1],[0,2,2],[1,0,1],[1,1,1],[1,2,1]],"purple":[],"gold":[[0,0,1],[0,1,2],[2,0,0]],"solution":[4,2],"title":"2本の射線を組み合わせる","chapter":"直交する光"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"}],"blue":[[0,0,2],[1,0,2],[1,1,2],[1,2,2],[2,0,2]],"purple":[],"gold":[[0,2,0],[1,0,1],[2,0,0],[2,1,1]],"solution":[2,5],"title":"交差する2本のレーザー","chapter":"直交する光"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,1,0],[0,1,1],[0,1,2],[0,2,0],[1,2,0],[2,2,0]],"purple":[],"gold":[[1,0,0],[2,1,0],[2,1,2],[2,2,1]],"solution":[6,1],"title":"奥に隠れた青を見つける","chapter":"直交する光"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,1,1],[1,0,1],[1,1,0],[1,1,2],[1,2,1],[2,1,1]],"purple":[[1,1,1]],"gold":[[0,0,0],[2,0,0],[2,2,2]],"solution":[4,4,4],"title":"交点の紫は2本以上","chapter":"交差の法則"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,2,1],[1,0,1],[1,1,1],[1,2,1],[2,1,0],[2,1,1],[2,1,2],[2,2,1]],"purple":[],"gold":[[1,0,0],[1,1,0],[2,0,1],[2,0,2]],"solution":[7,4,7],"title":"XYZから一斉に撃ち抜く","chapter":"交差の法則"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,0,1],[1,0,1],[1,0,2],[1,1,2],[1,2,0],[1,2,1],[2,0,1]],"purple":[[1,2,2]],"gold":[[0,0,0],[0,0,2],[1,1,1],[2,0,0],[2,1,0]],"solution":[1,5,5],"title":"交差点を探そう","chapter":"交差の法則"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,2,0],[1,0,0],[1,0,1],[1,0,2],[1,2,0],[2,0,2],[2,1,2],[2,2,0],[2,2,2]],"purple":[],"gold":[[1,1,0],[1,1,1],[1,2,1],[2,1,1]],"solution":[6,8,3],"title":"3方向の空間パズル","chapter":"交差の法則"},{"weapons":[{"axis":"z","type":"shot"}],"blue":[[2,1,1]],"purple":[],"gold":[[0,0,0],[0,2,2],[1,2,0],[2,1,0],[2,2,2]],"solution":[7],"title":"ショットは手前の1個だけ","chapter":"止まる弾"},{"weapons":[{"axis":"x","type":"shot"}],"blue":[[2,1,0]],"purple":[],"gold":[[0,2,0],[1,1,0],[1,1,2],[1,2,2],[2,0,2]],"solution":[3],"title":"金色の手前を撃ち抜こう","chapter":"止まる弾"},{"weapons":[{"axis":"z","type":"laser"},{"axis":"x","type":"shot"}],"blue":[[2,0,0],[2,0,1],[2,0,2],[2,1,2]],"purple":[],"gold":[[0,1,1],[1,0,0],[1,1,2],[1,2,2],[2,2,1]],"solution":[6,5],"title":"レーザーとショットを使う","chapter":"レーザーとショット"},{"weapons":[{"axis":"y","type":"laser"},{"axis":"z","type":"shot"}],"blue":[[0,0,0],[0,0,1],[0,1,0],[0,2,0]],"purple":[],"gold":[[1,0,0],[1,0,2],[1,1,1],[2,0,1],[2,0,2]],"solution":[0,0],"title":"金色の奥には届かない","chapter":"レーザーとショット"},{"weapons":[{"axis":"x","type":"shot"},{"axis":"y","type":"shot"}],"blue":[[0,1,2],[1,0,2]],"purple":[],"gold":[[0,0,2],[1,0,0],[2,1,1],[2,1,2]],"solution":[2,2],"title":"2発のショットを狙う","chapter":"レーザーとショット"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"shot"}],"blue":[[0,0,1],[1,0,1],[1,1,1],[1,1,2],[1,2,1],[2,0,1]],"purple":[],"gold":[[1,0,2],[1,1,0],[1,2,2],[2,1,1]],"solution":[1,4,4],"title":"XYZに異なる役割","chapter":"レーザーとショット"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"shot"},{"axis":"z","type":"shot"}],"blue":[[0,0,1],[1,0,1],[2,0,1],[2,2,1],[2,2,2]],"purple":[],"gold":[[0,0,0],[2,1,1],[2,2,0]],"solution":[1,7,8],"title":"1本貫通、2発は止まる","chapter":"レーザーとショット"},{"weapons":[{"axis":"x","type":"laser"},{"axis":"y","type":"laser"},{"axis":"z","type":"laser"}],"blue":[[0,0,2],[0,1,2],[0,2,0],[0,2,1],[1,2,2],[2,2,2]],"purple":[[0,2,2]],"gold":[[1,0,0],[1,1,1],[1,2,0],[2,1,1]],"solution":[8,2,2],"title":"3方向を読み切ろう","chapter":"レーザーとショット"}];
+const AXES=['x','y','z'];
+const $=id=>document.getElementById(id);
+const board=$('board'), canvas=$('cube'),ctx=canvas.getContext('2d',{alpha:true});
+let W=0,H=0,DPR=1,scale=46, cx=0,cy=0;
+const defaultYaw=.72, defaultPitch=.65;
+let yaw=defaultYaw,pitch=defaultPitch,viewTarget=null;
+let stageIndex=0,highest=0,soundOn=true, audio=null, won=false, fired=false,fireTime=0,fireReport=null,hintIndex=-1,tries=0;
+let chosen=[],hitPorts=[],pointer=null,particles=[],laserFlash=0,frame=0,activeGun=0;
+const storeKey='LASER_CUBE_M01';
+try{const saved=JSON.parse(localStorage.getItem(storeKey)||'{}');highest=Math.max(0,Math.min(LEVELS.length-1,Number(saved.highest)||0));stageIndex=Math.max(0,Math.min(highest,Number(saved.stage)||0));soundOn=saved.sound!==false}catch(e){}
+const pos=(a,b,c)=>[a,b,c];
+const k=p=>p.join(',');
+const cval=(a,b,c)=>`rgba(${a},${b},${c},1)`;
+function save(){try{localStorage.setItem(storeKey,JSON.stringify({highest,stage:stageIndex,sound:soundOn}))}catch(e){}}
+function getLevel(){return LEVELS[stageIndex]}
+function gunType(w){return w.type==='laser'?'LASER':'SHOT'}
+function playingTone(freq,dur=.07,type='sine',gain=.055,when=0){if(!soundOn)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const o=audio.createOscillator(),g=audio.createGain();const t=audio.currentTime+when;o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(freq*.78,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.009);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audio.destination);o.start(t);o.stop(t+dur+.025)}catch(e){}}
+function tick(){playingTone(500,.055,'sine',.035)}
+function fireSound(){playingTone(610,.17,'triangle',.075);playingTone(320,.14,'sine',.055,.035)}
+function winSound(){[[523,0],[659,.085],[784,.17],[1046,.275]].forEach(([f,t])=>playingTone(f,.26,'sine',.062,t))}
+function failSound(){playingTone(240,.12,'sine',.05);playingTone(195,.14,'sine',.03,.09)}
+function viewDir(){const c=Math.cos(pitch);return [Math.cos(yaw)*c,Math.sin(yaw)*c,Math.sin(pitch)]}
+function proj(p){const sz=scale,s=Math.sin(yaw),c=Math.cos(yaw),sp=Math.sin(pitch),cp=Math.cos(pitch);return {x:cx+(-s*p[0]+c*p[1])*sz,y:cy+(sp*(c*p[0]+s*p[1])-cp*p[2])*sz,d:Math.cos(pitch)*(c*p[0]+s*p[1])+Math.sin(pitch)*p[2]}}
+function line(a,b,color,width=1,alpha=1,dash=[]){ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
+function poly(points,fill,stroke,width=1,alpha=1){ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
+function dot(p,r,color,alpha=1,stroke){ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);if(color){ctx.fillStyle=color;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.1;ctx.stroke()}ctx.restore()}
+function lerp(a,b,t){return a+(b-a)*t}
+function vbox(){return [-1.49,1.49]}
+function planePoint(axis,c,a,b){const p=[0,0,0],i=AXES.indexOf(axis),others=[0,1,2].filter(j=>j!==i);p[i]=c;p[others[0]]=a;p[others[1]]=b;return p}
+function laneFor(axis,index){return [Math.floor(index/3),index%3]}
+function beamCells(w,index){const [a,b]=laneFor(w.axis,index);return [0,1,2].map(t=>{const p=planePoint(w.axis,t,a,b);return p})}
+function axisPortPos(axis,index,far=1.66){const [a,b]=laneFor(axis,index);return planePoint(axis,far,a-1,b-1)}
+function beamWorld(axis,index,t){const [a,b]=laneFor(axis,index);return planePoint(axis,t,a-1,b-1)}
+function evaluate(level,aims){const blocks=new Map();level.blue.forEach(p=>blocks.set(k(p),{kind:'blue',need:1}));level.purple.forEach(p=>blocks.set(k(p),{kind:'purple',need:2}));level.gold.forEach(p=>blocks.set(k(p),{kind:'gold',need:0}));const hits=new Map(),shotAt=[];
+  for(let j=0;j<level.weapons.length;j++){const w=level.weapons[j],ind=aims[j],a=AXES.indexOf(w.axis);if(ind<0)continue;const cells=beamCells(w,ind); // cells use 0..2 lattice coordinates
+    if(w.type==='laser'){for(const p of cells){const key=k(p);if(blocks.has(key))hits.set(key,(hits.get(key)||0)+1)}shotAt[j]=null}
+    else{const hit=cells.sort((p,q)=>q[a]-p[a]).find(p=>blocks.has(k(p)));if(hit){const key=k(hit);hits.set(key,(hits.get(key)||0)+1)}shotAt[j]=hit||null}
+  }
+  const broken=[],hurt=[],missed=[];for(const [key,block] of blocks){const n=hits.get(key)||0;if(block.kind==='gold'){if(n>0)hurt.push(key);continue}if(n>=block.need)broken.push(key);else missed.push(key)}
+  return {ok:!hurt.length&&!missed.length,broken,hurt,missed,hits,shotAt};
+}
+function resize(){const r=board.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);DPR=Math.min(window.devicePixelRatio||1,2.5);canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);canvas.style.width=W+'px';canvas.style.height=H+'px';scale=Math.min(W/5.68,H/5.45,72);cx=W*.50;cy=H*.50}
+function cubeFaces(c,kind,removed=false){const [x,y,z]=c, r=.455,dir=viewDir();const vertex=(a,b,d)=>proj([x+a*r,y+b*r,z+d*r]);const faceDefinitions=[{normal:[1,0,0],p:[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]],shade:2},{normal:[0,1,0],p:[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],shade:1},{normal:[0,0,1],p:[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],shade:0},{normal:[-1,0,0],p:[[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]],shade:2},{normal:[0,-1,0],p:[[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]],shade:1},{normal:[0,0,-1],p:[[-1,1,-1],[1,1,-1],[1,-1,-1],[-1,-1,-1]],shade:3}];
+ const colors={blue:['#9cece4','#4cc8be','#23a99f','#177f81'],purple:['#d0bfee','#aa93d6','#8870bc','#655d91'],gold:['#f5dcad','#e5bb7f','#ce9b5f','#a68256']};const cc=colors[kind];
+ for(const f of faceDefinitions){if(f.normal.reduce((sum,a,i)=>sum+a*dir[i],0)<.04)continue;const ps=f.p.map(p=>vertex(...p));poly(ps,cc[f.shade],kind==='gold'?'#ae987a':kind==='purple'?'#9989bb':'#56aaa6',.9,removed?.15:.94)}
+ if(kind==='purple'){const p=proj([x,y,z]);ctx.save();ctx.font=`800 ${Math.max(11,scale*.23)}px -apple-system,BlinkMacSystemFont,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.shadowColor='rgba(45,30,80,.2)';ctx.shadowBlur=2;ctx.fillText('2',p.x,p.y);ctx.restore()}
+}
+function drawWire(){const l=-1.48,r=1.48,dir=viewDir();const coords=[l,r];
+  // Faint lattice marking the bounds of the 3x3x3 cube.
+  for(let a=0;a<3;a++){const o=[0,1,2].filter(v=>v!==a);for(const v of coords)for(const w of coords){const p=[0,0,0],q=[0,0,0];p[a]=l;q[a]=r;p[o[0]]=v;q[o[0]]=v;p[o[1]]=w;q[o[1]]=w;line(proj(p),proj(q),'#a7c9c3',1.0,.45)}}
+  for(let axis=0;axis<3;axis++){if(dir[axis]<=0)continue;const oth=[0,1,2].filter(v=>v!==axis);for(const offset of [-.5,.5]){for(const fixed of oth){const moving=oth.find(x=>x!==fixed),p=[0,0,0],q=[0,0,0];p[axis]=r;q[axis]=r;p[fixed]=offset;q[fixed]=offset;p[moving]=l;q[moving]=r;line(proj(p),proj(q),'#8cbcb5',.8,.32)}}}
+}
+function drawShadow(){const center=proj([0,0,-1.75]);ctx.save();ctx.beginPath();ctx.ellipse(center.x,center.y+scale*.4,scale*1.9,scale*.35,0,0,Math.PI*2);ctx.fillStyle='rgba(50,95,88,.045)';ctx.fill();ctx.restore()}
+function drawBeams(now){const level=getLevel(),flash=fireReport && now-fireTime>0 && now-fireTime<920;
+ level.weapons.forEach((w,i)=>{const sel=chosen[i];if(sel<0)return;const first=proj(beamWorld(w.axis,sel,2.17));const tip=proj(beamWorld(w.axis,sel,-1.58));const skin=proj(beamWorld(w.axis,sel,1.5));
+  const isShot=w.type==='shot',color=isShot?'#e4a36d':'#1baea4';
+  line(first,skin,color,2,.54);dot(first,4.8,color,.95,'white');
+  if(!fired){line(skin,tip,color,1.05,.25,[4,5]);return}
+  if(flash){const t=(now-fireTime)/900,opacity=Math.max(0,(1-t)*.93);line(first,tip,color,isShot?3.3:4.5,opacity);line(first,tip,'#faffff',isShot?1.0:1.8,opacity);}
+ });
+}
+function drawPorts(){hitPorts=[];const level=getLevel(),dir=viewDir();
+ for(let i=0;i<level.weapons.length;i++){
+  const w=level.weapons[i],axis=w.axis,look=dir[AXES.indexOf(axis)];if(look<.11)continue;
+  if(i!==activeGun){if(chosen[i]>=0){const p=proj(axisPortPos(axis,chosen[i],1.64));dot(p,5.4,'#fff',.95);dot(p,3.7,w.type==='shot'?'#dfa36d':'#119f96',1)}continue}
+  const selected=chosen[i];const panel=Array.from({length:9},(_,j)=>proj(axisPortPos(axis,j,1.66)));
+  for(let j=0;j<9;j++){
+    const p=panel[j],active=j===selected,r=Math.max(4.7,Math.min(7.3,scale*.12));
+    dot(p,r+2.7,'#ffffff',.88);
+    dot(p,r,active?(w.type==='shot'?'#dfa36d':'#119f96'):'#c9e1db',active?1:.86,active?'#fff':'#9fc8be');
+    if(active)dot(p,2.15,'#fff',1);
+    hitPorts.push({x:p.x,y:p.y,r:Math.max(16,scale*.3),wIndex:i,j,depth:p.d});
+  }
+ }
+}
+function drawAxisLabel(){const level=getLevel(),dir=viewDir();for(const [i,w] of level.weapons.entries()){if(dir[AXES.indexOf(w.axis)]<.11)continue;
+  const p=proj(planePoint(w.axis,1.96,0,0));ctx.save();ctx.font=`900 ${Math.max(11,scale*.24)}px -apple-system,sans-serif`;ctx.textAlign='center';ctx.fillStyle=chosen[i]>=0?'#148f87':'#87a7a2';ctx.fillText(w.axis.toUpperCase(),p.x,p.y+4);ctx.restore();}}
+function drawParticles(dt){for(const o of particles){o.x+=o.vx*dt;o.y+=o.vy*dt;o.vy+=40*dt;o.life-=dt;ctx.save();ctx.globalAlpha=Math.min(1,o.life*2.1);ctx.fillStyle=o.color;ctx.beginPath();ctx.arc(o.x,o.y,Math.max(.5,o.size*o.life),0,7);ctx.fill();ctx.restore()}particles=particles.filter(p=>p.life>0)}
+function render(now){frame=requestAnimationFrame(render);if(!W||!H)return;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);if(viewTarget){yaw=lerp(yaw,viewTarget[0],.16);pitch=lerp(pitch,viewTarget[1],.16);if(Math.abs(yaw-viewTarget[0])+Math.abs(pitch-viewTarget[1])<.003){yaw=viewTarget[0];pitch=viewTarget[1];viewTarget=null}}
+ drawShadow();drawWire();
+ const level=getLevel(),data=[...level.gold.map(p=>({p,kind:'gold'})),...level.blue.map(p=>({p,kind:'blue'})),...level.purple.map(p=>({p,kind:'purple'}))];
+ const d=viewDir();data.sort((a,b)=>a.p.reduce((s,x,i)=>s+x*d[i],0)-b.p.reduce((s,x,i)=>s+x*d[i],0));
+ const after=fired&&fireReport&&now-fireTime>250;
+ for(const cell of data){const key=k(cell.p),broken=after&&fireReport.broken.includes(key),hurt=after&&fireReport.hurt.includes(key);if(broken)continue;cubeFaces(cell.p.map(x=>x-1),cell.kind);if(hurt){const p=proj(cell.p.map(x=>x-1));dot(p,scale*.36,'#ffbc88',Math.max(0,.17+.15*Math.sin(now/85)))}}
+ drawBeams(now);drawPorts();drawAxisLabel();drawParticles(1/60);
+}
+function ui(){const l=getLevel();$('chapter').textContent='CHAPTER '+String(1+(stageIndex<4?0:stageIndex<8?1:stageIndex<12?2:stageIndex<14?3:4)).padStart(2,'0')+' · '+l.chapter;
+ $('stageNum').textContent=String(stageIndex+1).padStart(2,'0')+' / '+LEVELS.length;$('title').textContent=l.title;
+ $('progress').style.width=(100*(stageIndex+1)/LEVELS.length)+'%';$('prev').disabled=stageIndex===0;$('nextStage').disabled=stageIndex>=highest;
+ $('blueCount').textContent=l.blue.length; $('goldCount').textContent=l.gold.length;$('purpleHud').style.display=l.purple.length?'flex':'none';$('purpleCount').textContent=l.purple.length+' ×2';
+ $('guns').innerHTML=AXES.map(a=>{const i=l.weapons.findIndex(w=>w.axis===a);const w=l.weapons[i],active=i>=0&&chosen[i]>=0;return `<button type="button" data-wi="${i}" aria-label="${a.toUpperCase()}軸の照準を選ぶ" ${i<0?'disabled':''} class="gun ${i<0?'off':active?'active':''} ${i===activeGun?'selected':''}"><span class="gunletter">${a.toUpperCase()}</span><div class="guncontent"><div class="guntype">${i<0?'—':gunType(w)}</div><div class="gunstate">${i<0?'使用しない':active?'照準セット':i===activeGun?'いま選択中':'位置を選ぶ'}</div></div><span class="gunpin"></span></button>`}).join('');
+ $('fire').disabled=(!won&&!fired&&chosen.some(i=>i<0));$('fire').classList.toggle('next',won);
+ $('fire').textContent=won?(stageIndex===LEVELS.length-1?'全20問クリア！ ↻':'次のステージ →'):fired?'もう一度':chosen.every(i=>i>=0)?'一斉射撃  ·  FIRE':'照準を合わせよう';
+ $('boardnote').style.opacity=fired?0:1;$('tip').textContent=won?'クリア！ 解き方を覚えたら次のステージへ。':fired?'当たった場所を確認して、もう一度。':hintIndex>=0?'ヒント：正しい照準を1つ示しています。':'丸をタップして照準 · ドラッグで立体を回転';
+ $('hint').textContent=hintIndex>=0?'ヒント表示中':'ヒント';$('hint').disabled=won||fired;
+ $('result').classList.toggle('visible',fired);$('result').classList.toggle('fail',fired&&!won);
+ if(fired){$('resultTitle').textContent=won?(stageIndex===LEVELS.length-1?'ALL CLEAR!':'CLEAR!'):fireReport.hurt.length?'金色に命中！':'青が残った';$('resultSub').textContent=won?'狙いどおり、すべて消えた':fireReport.hurt.length?'金色を残せる射線を探そう':'あと '+fireReport.missed.length+' 個、消せなかった';}
+ if(l.purple.length)$('desc').textContent='青は1本、紫は2本以上。金色は守る。';else if(l.weapons.some(w=>w.type==='shot'))$('desc').textContent='LASERは貫通。SHOTは最初の1個。金色を守る。';else $('desc').textContent='青をすべて消して、金色は残す。';
+}
+function show(i){stageIndex=Math.max(0,Math.min(LEVELS.length-1,i));yaw=defaultYaw;pitch=defaultPitch;viewTarget=null;chosen=getLevel().weapons.map(()=>-1);activeGun=0;won=false;fired=false;fireReport=null;hintIndex=-1;tries=0;particles=[];ui();save()}
+function shoot(){if(won){if(stageIndex<LEVELS.length-1)show(stageIndex+1);else{show(0)}tick();return}
+ if(fired){fired=false;fireReport=null;hintIndex=-1;ui();tick();return}
+ if(chosen.some(i=>i<0))return;
+ const l=getLevel();fireReport=evaluate(l,chosen);fired=true;fireTime=performance.now();tries++;fireSound();
+ setTimeout(()=>{if(!fired)return;for(const key of fireReport.broken){const p=key.split(',').map(Number).map(x=>x-1),c=proj(p);for(let i=0;i<10;i++){const theta=Math.random()*Math.PI*2,speed=22+Math.random()*90;particles.push({x:c.x,y:c.y,vx:Math.cos(theta)*speed,vy:Math.sin(theta)*speed-18,life:.45+Math.random()*.45,size:2+Math.random()*3,color:'#47bbb0'})}}},190);
+ if(fireReport.ok){won=true;highest=Math.max(highest,Math.min(LEVELS.length-1,stageIndex+1));save();setTimeout(winSound,190)}else setTimeout(failSound,340);
+ ui();
+}
+function hint(){if(fired||won)return;hintIndex=activeGun;const i=hintIndex,solution=getLevel().solution[i];chosen[i]=solution;const next=chosen.findIndex((v,j)=>v<0&&j!==i);if(next>=0)activeGun=next;tick();ui();}
+function resetView(){viewTarget=[defaultYaw,defaultPitch];tick()}
+function chooseAt(x,y){let nearest=null,dist=999;for(const p of hitPorts){const n=Math.hypot(p.x-x,p.y-y);if(n<dist&&n<p.r){nearest=p;dist=n}}
+ if(nearest&&(!fired)){chosen[nearest.wIndex]=nearest.j;hintIndex=-1;const next=chosen.findIndex((v,j)=>v<0&&j!==nearest.wIndex);if(next>=0)activeGun=next;tick();ui();return true}return false;}
+canvas.addEventListener('pointerdown',e=>{pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;let dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>8)pointer.moved=true;if(pointer.moved){viewTarget=null;yaw+=dx*.010;pitch=Math.max(.19,Math.min(1.24,pitch-dy*.0078));}});
+canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.moved){const r=canvas.getBoundingClientRect();chooseAt(e.clientX-r.left,e.clientY-r.top)}pointer=null;});
+canvas.addEventListener('pointercancel',()=>pointer=null);
+$('guns').addEventListener('click',e=>{const b=e.target.closest('button[data-wi]');if(!b||fired)return;const i=Number(b.dataset.wi);if(i>=0){activeGun=i;const a=AXES.indexOf(getLevel().weapons[i].axis);if(viewDir()[a]<.16)viewTarget=[defaultYaw,defaultPitch];tick();ui()}});$('fire').addEventListener('click',shoot);$('hint').addEventListener('click',hint);$('homeView').addEventListener('click',resetView);$('prev').addEventListener('click',()=>{if(stageIndex>0){show(stageIndex-1);tick()}});$('nextStage').addEventListener('click',()=>{if(stageIndex<highest){show(stageIndex+1);tick()}});
+function soundUi(){$('soundBtn').style.color=soundOn?'#448b85':'#afbbb7';$('soundBtn').setAttribute('aria-pressed',String(soundOn))}
+$('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;soundUi();save();tick()});soundUi();
+window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(board);
+show(stageIndex);resize();requestAnimationFrame(render);
+window.LASER_CUBE={LEVELS,show,evaluate,get chosen(){return chosen},setChosen(a){chosen=a.slice();ui()},shoot,get ports(){return hitPorts.map(p=>({x:p.x,y:p.y,wIndex:p.wIndex,j:p.j}))},get stage(){return stageIndex},get result(){return fireReport}};
+})();
+</script>
+</body></html>
