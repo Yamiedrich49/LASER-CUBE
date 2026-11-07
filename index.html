@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1">
 <meta name="theme-color" content="#f6f9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — FLOW CONTROL v21</title>
+<title>LASER CUBE — SILHOUETTE REFINEMENT v22</title>
 <style>
 :root{--bg:#f7f9f8;--ink:#193941;--mute:#7c9498;--mint:#239bc0;--mint-light:#d8f4ff;--warm:#db8737;--line:#dbe7e8;--virus:#4b395e;--ally:#ffffff;--ally-line:#a7bec0;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -291,17 +291,17 @@ function faceMark(o,r,normal,kind,alpha,faceOpacity,power=1){
     ctx.fillStyle=spikeFill;ctx.strokeStyle=spikeEdge;ctx.lineWidth=.08;
     for(const s of spikes){ctx.beginPath();ctx.moveTo(s[0],s[1]);ctx.lineTo(s[2],s[3]);ctx.lineTo(s[4],s[5]);ctx.closePath();ctx.fill();ctx.stroke();}
    }
-   ctx.fillStyle=elite?'#120915':(tough?'#24102f':'#24152f');ctx.beginPath();ctx.roundRect(-.86,-.69,1.72,1.36,.30);ctx.fill();
-   const eyeWhite=elite?'#ffd5e6':'#ffdaec';
-   const iris=elite?'#7c0a3d':'#5f1940';
+   ctx.fillStyle=elite?'#120915':(tough?'#24102f':'#e4d1eb');ctx.beginPath();ctx.roundRect(-.86,-.69,1.72,1.36,tough?.30:.40);ctx.fill();
+   const eyeWhite=elite?'#ffd5e6':(tough?'#ffdaec':'#fdf4ff');
+   const iris=elite?'#7c0a3d':(tough?'#5f1940':'#744d87');
    const eyeY=tough?.13:.17;
    const eyeRX=tough?.21:.18;
    const eyeRY=tough?.23:.20;
    for(const x of[-.48,.48]){ctx.fillStyle=eyeWhite;ctx.beginPath();ctx.ellipse(x,eyeY,eyeRX,eyeRY,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=iris;ctx.beginPath();ctx.ellipse(x+(elite?0:.005),eyeY-.01,.11,.145,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(x-.05,eyeY+.05,.034,0,Math.PI*2);ctx.fill();}
-   ctx.strokeStyle=elite?'#0c020f':'#38192f';ctx.lineWidth=.10;ctx.beginPath();ctx.moveTo(-.54,-.06);ctx.lineTo(-.17,.03);ctx.moveTo(.54,-.06);ctx.lineTo(.17,.03);ctx.stroke();
-   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(-.20,-.17);ctx.lineTo(-.08,-.39);ctx.lineTo(.00,-.17);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(.20,-.17);ctx.lineTo(.08,-.39);ctx.lineTo(.00,-.17);ctx.closePath();ctx.fill();
+   ctx.strokeStyle=elite?'#0c020f':(tough?'#38192f':'#986eaa');ctx.lineWidth=tough?.10:.07;ctx.beginPath();ctx.moveTo(-.54,tough?-.06:.00);ctx.lineTo(-.17,tough?.03:-.02);ctx.moveTo(.54,tough?-.06:.00);ctx.lineTo(.17,tough?.03:-.02);ctx.stroke();
+   ctx.fillStyle=tough?'#ffffff':'#fff8ff';ctx.beginPath();ctx.moveTo(-.20,-.17);ctx.lineTo(-.08,tough?-.39:-.30);ctx.lineTo(.00,-.17);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(.20,-.17);ctx.lineTo(.08,tough?-.39:-.30);ctx.lineTo(.00,-.17);ctx.closePath();ctx.fill();
    if(tough){ctx.beginPath();ctx.moveTo(-.02,-.08);ctx.lineTo(.06,-.31);ctx.lineTo(.17,-.07);ctx.closePath();ctx.fill();}
-   ctx.strokeStyle=elite?'#ff4ca5':'#ff8eb7';ctx.lineWidth=.09;ctx.beginPath();ctx.moveTo(-.28,-.16);ctx.quadraticCurveTo(0,-.38,.28,-.16);ctx.stroke();
+   ctx.strokeStyle=elite?'#ff4ca5':(tough?'#ff8eb7':'#a67bb8');ctx.lineWidth=tough?.09:.07;ctx.beginPath();ctx.moveTo(-.28,-.16);ctx.quadraticCurveTo(0,tough?-.38:-.29,.28,-.16);ctx.stroke();
    if(tough){ctx.strokeStyle=elite?'#ffd3ec':'#d9b2ff';ctx.lineWidth=.055;ctx.beginPath();ctx.moveTo(-.66,.41);ctx.lineTo(-.42,.26);ctx.moveTo(.66,.41);ctx.lineTo(.42,.26);ctx.stroke();}
   }else{
    ctx.fillStyle='#fbffff';ctx.beginPath();ctx.roundRect(-.87,-.72,1.74,1.44,.35);ctx.fill();
@@ -313,10 +313,10 @@ function faceMark(o,r,normal,kind,alpha,faceOpacity,power=1){
  }else if(normal[0]!==0){
   if(kind==='virus'){
    if(tough){ctx.fillStyle=elite?'#2d0c22':'#39153f';ctx.beginPath();ctx.moveTo(-.18,-.48);ctx.lineTo(.02,-.70);ctx.lineTo(.15,-.46);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(.11,-.35);ctx.lineTo(.34,-.58);ctx.lineTo(.38,-.29);ctx.closePath();ctx.fill();}
-   ctx.fillStyle=elite?'#ffd5e6':'#f5b9d7';ctx.beginPath();ctx.ellipse(.03,.14,.22,.245,0,0,TAU);ctx.fill();
-   ctx.fillStyle=elite?'#7c0a3d':'#5f2146';ctx.beginPath();ctx.ellipse(.045,.12,.105,.14,0,0,TAU);ctx.fill();
-   ctx.strokeStyle='#160d22';ctx.lineWidth=.125;ctx.beginPath();ctx.moveTo(-.27,.46);ctx.lineTo(.25,.29);ctx.stroke();
-   ctx.strokeStyle=elite?'#ff4ca5':'#f2a5ca';ctx.lineWidth=.09;ctx.beginPath();ctx.moveTo(-.25,-.28);ctx.quadraticCurveTo(.08,-.45,.30,-.28);ctx.stroke();
+   ctx.fillStyle=elite?'#ffd5e6':(tough?'#f5b9d7':'#fcf0ff');ctx.beginPath();ctx.ellipse(.03,.14,.22,.245,0,0,TAU);ctx.fill();
+   ctx.fillStyle=elite?'#7c0a3d':(tough?'#5f2146':'#79558c');ctx.beginPath();ctx.ellipse(.045,.12,.105,.14,0,0,TAU);ctx.fill();
+   ctx.strokeStyle=tough?'#160d22':'#9572a5';ctx.lineWidth=tough?.125:.085;ctx.beginPath();ctx.moveTo(-.27,.46);ctx.lineTo(.25,.29);ctx.stroke();
+   ctx.strokeStyle=elite?'#ff4ca5':(tough?'#f2a5ca':'#ab8bb7');ctx.lineWidth=tough?.09:.07;ctx.beginPath();ctx.moveTo(-.25,-.28);ctx.quadraticCurveTo(.08,-.45,.30,-.28);ctx.stroke();
    ctx.fillStyle='#fff9ff';ctx.beginPath();ctx.moveTo(.05,-.31);ctx.lineTo(.21,-.49);ctx.lineTo(.28,-.30);ctx.closePath();ctx.fill();
   }else{
    ctx.fillStyle='#334c5b';ctx.beginPath();ctx.ellipse(.02,.13,.20,.26,0,0,TAU);ctx.fill();
@@ -325,8 +325,8 @@ function faceMark(o,r,normal,kind,alpha,faceOpacity,power=1){
    ctx.strokeStyle='#7198a4';ctx.lineWidth=.105;ctx.beginPath();ctx.moveTo(-.11,-.18);ctx.quadraticCurveTo(.16,-.39,.34,-.16);ctx.stroke();
   }
  }else if(kind==='virus'){
-  ctx.strokeStyle=elite?'#d491ff':'#8f78a7';ctx.lineWidth=.10;ctx.beginPath();ctx.moveTo(-.28,.24);ctx.lineTo(.08,-.12);ctx.moveTo(-.02,.24);ctx.lineTo(.30,-.08);ctx.stroke();
-  ctx.fillStyle=elite?'#ff4ca5':'#ff6ead';ctx.beginPath();ctx.arc(-.30,-.24,.08,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=elite?'#d491ff':(tough?'#8f78a7':'#9e84b0');ctx.lineWidth=.10;ctx.beginPath();ctx.moveTo(-.28,.24);ctx.lineTo(.08,-.12);ctx.moveTo(-.02,.24);ctx.lineTo(.30,-.08);ctx.stroke();
+  ctx.fillStyle=elite?'#ff4ca5':(tough?'#ff6ead':'#c4a0d5');ctx.beginPath();ctx.arc(-.30,-.24,.08,0,Math.PI*2);ctx.fill();
   if(tough){ctx.beginPath();ctx.moveTo(.22,-.28);ctx.lineTo(.38,-.45);ctx.lineTo(.42,-.20);ctx.closePath();ctx.fill();}
  }else{
   ctx.fillStyle='#7fcbd7';ctx.strokeStyle='#fbffff';ctx.lineWidth=.06;ctx.beginPath();ctx.moveTo(0,-.28);ctx.bezierCurveTo(-.15,-.12,-.31,.06,-.23,.22);ctx.bezierCurveTo(-.12,.38,0,.26,0,.20);ctx.bezierCurveTo(0,.26,.12,.38,.23,.22);ctx.bezierCurveTo(.31,.06,.15,-.12,0,-.28);ctx.closePath();ctx.fill();ctx.stroke();
@@ -345,8 +345,8 @@ function cubeFaces(c,kind,alpha=1,shrink=1,power=1){
   {n:[0,-1,0],v:[[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]]},
   {n:[-1,0,0],v:[[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]]}
  ];
- const base=virus?(elite?'#140816':(tough?'#241032':'#38284a')):'#edf8f8';
- const edge=virus?(elite?'#ff62ba':(tough?'#c5a0ff':'#0f0a17')):'#89aeb3';
+ const base=virus?(elite?'#140816':(tough?'#241032':'#cbb3d9')):'#edf8f8';
+ const edge=virus?(elite?'#ff62ba':(tough?'#c5a0ff':'#9d80b0')):'#89aeb3';
  const light=[-.46,.32,.83];
  let anyTop=false;
  for(const f of faces){
@@ -355,11 +355,11 @@ function cubeFaces(c,kind,alpha=1,shrink=1,power=1){
   const faceFade=Math.min(1,Math.max(0,facing/.14));
   const lit=Math.max(-.55,Math.min(.85,f.n[0]*light[0]+f.n[1]*light[1]+f.n[2]*light[2]));
   const corners=f.v.map(vert);
-  const fill=tint(base, virus?((elite?lit*.24:lit*.29)+(elite?-0.02:-0.08)):(lit*.26+.02));
-  roundedQuad(corners,fill,edge,virus?1.3:1.06,alpha*faceFade,Math.max(4.2,scale*.075));
+  const fill=tint(base, virus?(tough?((elite?lit*.24:lit*.29)+(elite?-0.02:-0.08)):(lit*.23+.01)):(lit*.26+.02));
+  roundedQuad(corners,fill,edge,virus?(tough?1.3:1.0):1.06,alpha*faceFade,Math.max(4.2,scale*(virus&&!tough?.100:.075)));
   const faceC=project(o.map((v,i)=>v+f.n[i]*r));
   const inner=corners.map(p=>({x:faceC.x+(p.x-faceC.x)*.84,y:faceC.y+(p.y-faceC.y)*.84}));
-  roundedQuad(inner, virus?tint((elite?'#31103b':(tough?'#43235e':'#4e3b67')),lit*.20):tint('#ffffff',lit*.10), virus?(elite?'#ffd2ef':(tough?'#e0bbff':'#8d76a6')):'#ffffff', virus?(tough?.92:.55):.75, alpha*faceFade*(virus?(tough?.52:.34):.86), Math.max(3.4,scale*.062));
+  roundedQuad(inner, virus?tint((elite?'#31103b':(tough?'#43235e':'#ead9f1')),lit*.20):tint('#ffffff',lit*.10), virus?(elite?'#ffd2ef':(tough?'#e0bbff':'#dec4eb')):'#ffffff', virus?(tough?.92:.65):.75, alpha*faceFade*(virus?(tough?.52:.65):.86), Math.max(3.4,scale*(virus&&!tough?.080:.062)));
   faceMark(o,r,f.n,kind,alpha*faceFade,Math.min(1,Math.max(0,facing/.16)),power);
   if(virus&&tough){
    const cx=corners.reduce((s,p)=>s+p.x,0)/corners.length, cy=corners.reduce((s,p)=>s+p.y,0)/corners.length;
@@ -383,9 +383,9 @@ function cubeFaces(c,kind,alpha=1,shrink=1,power=1){
  for(const side of [-1,1]){
   const P=(x,y,z)=>project([o[0]+x*r,o[1]+y*r,o[2]+z*r]);
   if(virus){
-   const hornTip=tough?(elite?1.42:1.34):1.24;
+   const hornTip=tough?(elite?1.42:1.34):1.095;
    const p1=P(side*.31,.38,1.0),p2=P(side*.65,.38,1.0),p3=P(side*.49,.11,1.0),tip=P(side*.50,.22,hornTip);
-   polygon([p1,p2,tip],elite?'#120716':'#17101f',elite?'#ff62ba':'#090611',tough?1.0:.7,alpha*topFade); polygon([p2,p3,tip],elite?'#4b0f4f':(tough?'#6d3d7a':'#4f3c63'),elite?'#ffb6e4':'#1a1323',tough?.9:.65,alpha*topFade);
+   polygon([p1,p2,tip],elite?'#120716':(tough?'#17101f':'#a58bb5'),elite?'#ff62ba':(tough?'#090611':'#9575a7'),tough?1.0:.6,alpha*topFade); polygon([p2,p3,tip],elite?'#4b0f4f':(tough?'#6d3d7a':'#dac6e5'),elite?'#ffb6e4':(tough?'#1a1323':'#a58bb5'),tough?.9:.6,alpha*topFade);
    if(tough){const tip2=P(side*.18,.33,elite?1.28:1.20); const a=P(side*.05,.25,1.0),b=P(side*.27,.27,1.0); polygon([a,b,tip2],elite?'#240b2d':'#2f143b',elite?'#f48dd6':'#c1a0f8',.8,alpha*topFade*.95);}
   }else{
    const ear=P(side*.48,.28,1.12),glow=P(side*.48,.28,1.03);const rad=Math.max(1.8,scale*.07*shrink);
