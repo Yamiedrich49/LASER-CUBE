@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#f6f9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — CUBE CREATURES v11</title>
+<title>LASER CUBE — CUBE CREATURES v12</title>
 <style>
 :root{--bg:#f7f9f8;--ink:#193941;--mute:#7c9498;--mint:#239bc0;--mint-light:#d8f4ff;--warm:#db8737;--line:#dbe7e8;--virus:#4b395e;--ally:#ffffff;--ally-line:#a7bec0;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -23,8 +23,8 @@ button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visibl
 .title{text-align:center;font-size:18px;font-weight:870;letter-spacing:.028em;margin:8px 0 0}.subtitle{text-align:center;font-size:11px;color:var(--mute);margin:4px 0 0}
 .arena{position:relative;flex:1 1 auto;min-height:235px;border:1px solid #dde8ea;border-radius:27px;overflow:hidden;isolation:isolate;touch-action:none;box-shadow:0 16px 38px rgba(31,74,71,.06),inset 0 1px rgba(255,255,255,.92);background:radial-gradient(ellipse 88% 67% at 50% 43%,#fff 4%,#fdfefe 52%,#edf4f5 100%);user-select:none;-webkit-user-select:none}
 #scene{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}#scene:active{cursor:grabbing}
-.loadout{position:absolute;left:9px;right:9px;top:9px;display:flex;gap:6px;pointer-events:none}
-.weapon{pointer-events:auto;min-width:0;flex:1;display:flex;align-items:center;gap:6px;padding:8px 8px;border:1px solid rgba(201,222,216,.92);background:rgba(255,255,255,.84);border-radius:14px;box-shadow:0 2px 10px rgba(27,70,64,.035);text-align:left;transition:border-color .13s,background .13s}
+.loadout{position:absolute;left:9px;right:9px;top:10px;display:flex;gap:8px;pointer-events:none}
+.weapon{pointer-events:auto;min-width:0;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;padding:7px 3px 6px;border:1px solid rgba(201,222,216,.92);background:rgba(255,255,255,.86);border-radius:16px;box-shadow:0 2px 10px rgba(27,70,64,.035);text-align:center;transition:border-color .13s,background .13s}
 .weapon.selected{border-color:#51b8d7;background:rgba(240,251,255,.98);box-shadow:0 0 0 1px rgba(57,177,212,.18),0 6px 15px rgba(31,105,131,.065)}
 .weapon.selected.shot{border-color:#e3a35c;background:rgba(255,249,241,.98);box-shadow:0 0 0 1px rgba(211,139,69,.16)}
 .weapon.done{background:rgba(248,251,250,.75)}
@@ -35,11 +35,9 @@ button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visibl
 .notice.show{animation:land .27s cubic-bezier(.16,1.6,.4,1) both}
 .weapon:focus-visible,.reset:focus-visible,.fire:focus-visible{outline:2px solid #26a9d1;outline-offset:2px}
 @keyframes land{0%{scale:.93}100%{scale:1}}
-.weapon-num{font-size:10px;font-weight:900;color:#8aa9a4;align-self:flex-start;line-height:1.1}
-.weapon-icon{width:24px;height:24px;flex:none;display:grid;place-items:center}
-.weapon-icon svg{width:26px;height:26px;display:block}
-.weapon-copy{min-width:0}.weapon-type{display:block;font-size:11px;font-weight:880;line-height:1.1;white-space:nowrap}.weapon-state{display:block;font-size:9px;color:#8ca8a3;white-space:nowrap;margin-top:3px}
-.shot .weapon-type{color:#bf7330}.laser .weapon-type{color:#2096bc}
+.weapon-num{font-size:10px;font-weight:900;color:#88a4a8;line-height:1.05}
+.weapon-icon{width:28px;height:28px;flex:none;display:grid;place-items:center}
+.weapon-icon svg{width:28px;height:28px;display:block}.weapon-copy{display:none}.weapon-mark{display:block;font-size:10px;line-height:1;color:#88a4a8;min-height:10px}.weapon.done .weapon-mark{color:#3fa56c}.shot .weapon-mark{color:#c9843e}.laser .weapon-mark{color:#2a9dc3}
 .arena-hint{position:absolute;bottom:69px;left:10px;right:10px;text-align:center;font-size:10px;color:#8ba6a1;pointer-events:none;line-height:1.35;min-height:15px}
 .bottom{position:absolute;bottom:11px;left:11px;right:11px;display:flex;gap:8px;align-items:center;height:47px}
 .reset{height:47px;padding:0 13px;flex:none;border:1px solid #d9e8e4;background:rgba(255,255,255,.88);color:#6d928d;font-weight:780;font-size:12px;border-radius:14px}
@@ -47,7 +45,7 @@ button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visibl
 .notice{position:absolute;left:50%;top:91px;transform:translateX(-50%) translateY(-8px);width:max-content;max-width:91%;text-align:center;border-radius:18px;padding:9px 17px;background:rgba(255,255,255,.94);border:1px solid #e2eee9;box-shadow:0 10px 24px rgba(31,75,70,.10);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
 .notice.show{opacity:1;transform:translateX(-50%) translateY(0)}.notice strong{display:block;font-weight:920;font-size:18px;color:#168e85;letter-spacing:.075em}.notice small{font-size:10px;display:block;margin-top:3px;color:#829993}.notice.bad strong{color:#bf8355}
 .foot{flex:none;min-height:15px;text-align:center;color:#a3b5b0;font-size:9px;letter-spacing:.02em}
-@media(max-height:670px){.app{gap:4px;padding-top:calc(env(safe-area-inset-top) + 5px);padding-bottom:calc(env(safe-area-inset-bottom) + 5px)}.top{min-height:34px}.iconbtn{width:35px;height:35px}.title{font-size:16px;margin-top:5px}.subtitle{font-size:10px}.arena{min-height:205px}.weapon{padding:6px 5px;gap:4px}.loadout{top:7px}.arena-hint{bottom:59px}.bottom{height:42px}.reset,.fire{height:42px}.notice{top:75px}}
+@media(max-height:670px){.app{gap:4px;padding-top:calc(env(safe-area-inset-top) + 5px);padding-bottom:calc(env(safe-area-inset-bottom) + 5px)}.top{min-height:34px}.iconbtn{width:35px;height:35px}.title{font-size:16px;margin-top:5px}.subtitle{font-size:10px}.arena{min-height:205px}.weapon{padding:5px 2px 5px;gap:1px}.loadout{top:7px}.arena-hint{bottom:59px}.bottom{height:42px}.reset,.fire{height:42px}.notice{top:75px}}
 @media(max-width:350px){.app{padding-left:8px;padding-right:8px}.weapon-icon{width:20px}.weapon-icon svg{width:23px}.weapon-type{font-size:10px}.weapon-state{font-size:8px}.weapon{padding:6px 4px}.logo{font-size:16px}}
 </style>
 </head>
@@ -76,7 +74,7 @@ const defaultYaw=.72,defaultPitch=.63;
 let yaw=defaultYaw,pitch=defaultPitch,rawYaw=defaultYaw,rawPitch=defaultPitch,targetView=null,stage=0,highest=0,soundOn=true,audio=null;
 let selected=0,aims=[],shotsDone=false,settled=false,success=false,report=null,startTime=0,frame=0,hitAreas=[],pointer=null,history=[],shotSeq=0;
 let aimPulse={start:0,aim:null,weapon:0},clearTime=0,lastTickYaw=Math.round(defaultYaw/(Math.PI/15)),lastTickPitch=Math.round(defaultPitch/(Math.PI/15)),lastRotSound=0;
-const KEY='LASER_CUBE_V10'; // preserves existing progress
+const KEY='LASER_CUBE_V10'; // preserve progress from v11
 try{const j=JSON.parse(localStorage.getItem(KEY)||'{}');stage=Math.max(0,Math.min(LEVELS.length-1,j.stage||0));highest=Math.max(0,Math.min(LEVELS.length-1,j.highest||0));soundOn=j.sound!==false}catch(e){}
 const key=p=>p.join(','),clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),mix=(a,b,t)=>a+(b-a)*t;
 const comp=d=>[d[0],d[1],d[2]];
@@ -171,6 +169,9 @@ function visible(p){return camera().reduce((s,v,i)=>s+p[i]*v,0)}
 function stroke(a,b,color,width=1,opacity=1,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.globalAlpha=opacity;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
 function polygon(ps,fill,edge,width=1,opacity=1){ctx.save();ctx.globalAlpha=opacity;ctx.beginPath();ctx.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))ctx.lineTo(p.x,p.y);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
 function circle(p,r,fill,opacity=1,edge=null,width=1){ctx.save();ctx.globalAlpha=opacity;ctx.beginPath();ctx.arc(p.x,p.y,r,0,TAU);if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
+function mixHex(a,b,t){const pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);const ar=(pa>>16)&255,ag=(pa>>8)&255,ab=pa&255,br=(pb>>16)&255,bg=(pb>>8)&255,bb=pb&255;const m=v=>Math.max(0,Math.min(255,Math.round(v)));const rr=m(ar+(br-ar)*t),rg=m(ag+(bg-ag)*t),rb=m(ab+(bb-ab)*t);return '#'+((1<<24)+(rr<<16)+(rg<<8)+rb).toString(16).slice(1)}
+function tint(c,t){return t>=0?mixHex(c,'#ffffff',Math.min(1,t)):mixHex(c,'#000000',Math.min(1,-t))}
+function roundedQuad(ps,fill,edge,width=1,opacity=1,r=6){ctx.save();ctx.globalAlpha=opacity;const n=ps.length;const ds=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);ctx.beginPath();for(let i=0;i<n;i++){const prev=ps[(i-1+n)%n],cur=ps[i],next=ps[(i+1)%n];const rr=Math.min(r,ds(prev,cur)*.32,ds(cur,next)*.32);const p1={x:cur.x+(prev.x-cur.x)*rr/ds(prev,cur),y:cur.y+(prev.y-cur.y)*rr/ds(prev,cur)};const p2={x:cur.x+(next.x-cur.x)*rr/ds(next,cur),y:cur.y+(next.y-cur.y)*rr/ds(next,cur)};if(i===0)ctx.moveTo(p1.x,p1.y);else ctx.lineTo(p1.x,p1.y);ctx.quadraticCurveTo(cur.x,cur.y,p2.x,p2.y)}ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
 function print(p,t,color,size=12,weight=800){ctx.save();ctx.font=`${weight} ${size}px -apple-system, BlinkMacSystemFont, sans-serif`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,p.x,p.y);ctx.restore()}
 function resize(){const r=arena.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);dpr=Math.min(2.5,window.devicePixelRatio||1);canvas.width=W*dpr;canvas.height=H*dpr;const d=getLevel().dims;scale=Math.min(W/(.66*(d[0]+d[1])+1.35),H/(.55*(d[0]+d[1]+d[2])+2.55),84);if(H<445)scale*=.81;else if(H<515)scale*=.92;cx=W*.50;cy=H<445?H*.475:H<515?H*.495:H*.525}
 function drawFrame(){const d=getLevel().dims,mins=d.map(v=>-v/2),maxs=d.map(v=>v/2);
@@ -188,94 +189,62 @@ function faceMark(o,r,normal,kind,alpha,faceOpacity){
  const det=(U.x-C.x)*(V.y-C.y)-(V.x-C.x)*(U.y-C.y);
  if(Math.abs(det)<9)return;
  ctx.save();
- ctx.globalAlpha=alpha*faceOpacity;
- ctx.transform(U.x-C.x,U.y-C.y,V.x-C.x,V.y-C.y,C.x,C.y);
- ctx.lineCap='round';ctx.lineJoin='round';
+ ctx.translate(C.x,C.y);
+ ctx.transform((U.x-C.x)/2,(U.y-C.y)/2,(V.x-C.x)/2,(V.y-C.y)/2,0,0);
+ ctx.globalAlpha=alpha*(isFace?(.18+.82*faceOpacity):.58);
  if(isFace){
-  // A slightly raised muzzle makes the identity legible at phone size.
-  ctx.fillStyle=kind==='virus'?'#443054':'#fafefd';
-  ctx.strokeStyle=kind==='virus'?'#806596':'#d5e8e9';
-  ctx.lineWidth=.044;
-  ctx.beginPath();ctx.moveTo(-.66,-.53);ctx.quadraticCurveTo(0,-.64,.66,-.53);
-  ctx.quadraticCurveTo(.74,.05,.58,.50);ctx.quadraticCurveTo(0,.64,-.58,.50);
-  ctx.quadraticCurveTo(-.74,.05,-.66,-.53);ctx.closePath();ctx.fill();ctx.stroke();
   if(kind==='virus'){
-   // Sharply angled brows, luminous eyes and little triangular fangs.
-   ctx.fillStyle='#ffa7d4';
-   for(const x of [-.30,.30]){
-    ctx.beginPath();ctx.ellipse(x,.17,.112,.135,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#150d21';ctx.beginPath();ctx.arc(x+.02,.13,.041,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#ffa7d4';
-   }
-   ctx.strokeStyle='#f391bd';ctx.lineWidth=.084;
-   ctx.beginPath();ctx.moveTo(-.48,.39);ctx.lineTo(-.18,.26);
-   ctx.moveTo(.48,.39);ctx.lineTo(.18,.26);ctx.stroke();
-   ctx.fillStyle='#1b0b23';ctx.beginPath();ctx.moveTo(-.31,-.24);
-   ctx.quadraticCurveTo(0,-.47,.31,-.24);ctx.lineTo(.25,-.45);
-   ctx.quadraticCurveTo(0,-.58,-.25,-.45);ctx.closePath();ctx.fill();
-   ctx.fillStyle='#fef9ff';
-   for(const x of [-.17,.14]){
-    ctx.beginPath();ctx.moveTo(x-.08,-.31);ctx.lineTo(x+.08,-.31);ctx.lineTo(x,-.45);ctx.closePath();ctx.fill();
-   }
+   ctx.fillStyle='#1c1028';ctx.beginPath();ctx.roundRect(-.62,-.54,1.24,1.08,.22);ctx.fill();
+   ctx.fillStyle='#ffdaec'; for(const x of[-.29,.29]){ctx.beginPath();ctx.ellipse(x,.13,.145,.17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5f1940';ctx.beginPath();ctx.arc(x,.13,.07,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(x-.03,.18,.023,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffdaec';}
+   ctx.strokeStyle='#38192f';ctx.lineWidth=.09;ctx.beginPath();ctx.moveTo(-.43,-.08);ctx.lineTo(-.13,.02);ctx.moveTo(.43,-.08);ctx.lineTo(.13,.02);ctx.stroke();
+   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(-.14,-.19);ctx.lineTo(-.05,-.34);ctx.lineTo(.01,-.20);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(.14,-.19);ctx.lineTo(.05,-.34);ctx.lineTo(-.01,-.20);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='#ff8eb7';ctx.lineWidth=.08;ctx.beginPath();ctx.moveTo(-.23,-.18);ctx.quadraticCurveTo(0,-.33,.23,-.18);ctx.stroke();
   }else{
-   ctx.fillStyle='#344b59';
-   for(const x of [-.30,.30]){
-    ctx.beginPath();ctx.ellipse(x,.14,.115,.15,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#f9ffff';ctx.beginPath();ctx.arc(x-.030,.20,.031,0,Math.PI*2);ctx.fill();ctx.fillStyle='#344b59';
-   }
-   ctx.fillStyle='#f1bfc8';
-   for(const x of [-.53,.53]){ctx.beginPath();ctx.ellipse(x,-.09,.13,.075,0,0,Math.PI*2);ctx.fill();}
-   ctx.strokeStyle='#789ba5';ctx.lineWidth=.07;
-   ctx.beginPath();ctx.moveTo(-.24,-.22);ctx.bezierCurveTo(-.12,-.44,.12,-.44,.24,-.22);ctx.stroke();
-   // Tiny protective heart on the forehead.
-   ctx.fillStyle='#99d9e6';ctx.beginPath();ctx.moveTo(0,.39);
-   ctx.bezierCurveTo(-.22,.54,-.25,.26,0,.30);
-   ctx.bezierCurveTo(.25,.26,.22,.54,0,.39);ctx.fill();
+   ctx.fillStyle='#fbffff';ctx.beginPath();ctx.roundRect(-.63,-.54,1.26,1.08,.26);ctx.fill();
+   ctx.fillStyle='#324d58'; for(const x of[-.30,.30]){ctx.beginPath();ctx.ellipse(x,.11,.13,.17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(x-.03,.15,.025,0,Math.PI*2);ctx.fill();ctx.fillStyle='#324d58';}
+   ctx.fillStyle='#f2c6d0'; for(const x of[-.50,.50]){ctx.beginPath();ctx.ellipse(x,-.02,.12,.08,0,0,Math.PI*2);ctx.fill();}
+   ctx.strokeStyle='#7ca1aa';ctx.lineWidth=.075;ctx.beginPath();ctx.moveTo(-.22,-.12);ctx.quadraticCurveTo(0,-.28,.22,-.12);ctx.stroke();
+   ctx.fillStyle='#8fd8e7';ctx.beginPath();ctx.moveTo(0,.37);ctx.bezierCurveTo(-.18,.50,-.22,.28,0,.29);ctx.bezierCurveTo(.22,.28,.18,.50,0,.37);ctx.fill();
   }
  }else if(kind==='virus'){
-  // Dangerous crystal scar on every non-face side: no face switching.
-  ctx.strokeStyle='#a58ab6';ctx.lineWidth=.11;
-  ctx.beginPath();ctx.moveTo(-.36,.39);ctx.lineTo(.31,-.35);
-  ctx.moveTo(-.10,.39);ctx.lineTo(.49,-.23);ctx.stroke();
-  ctx.fillStyle='#d86ea5';ctx.beginPath();ctx.arc(-.39,-.37,.085,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#8f78a7';ctx.lineWidth=.10;ctx.beginPath();ctx.moveTo(-.28,.24);ctx.lineTo(.08,-.12);ctx.moveTo(-.02,.24);ctx.lineTo(.30,-.08);ctx.stroke();
+  ctx.fillStyle='#ff6ead';ctx.beginPath();ctx.arc(-.30,-.24,.08,0,Math.PI*2);ctx.fill();
  }else{
-  // A clear, soft heart means "protect" even when the main face is hidden.
-  ctx.fillStyle='#7fcbd7';ctx.strokeStyle='#faffff';ctx.lineWidth=.07;
-  ctx.beginPath();ctx.moveTo(0,-.42);
-  ctx.bezierCurveTo(-.23,-.22,-.50,.08,-.36,.32);
-  ctx.bezierCurveTo(-.18,.58,0,.38,0,.30);
-  ctx.bezierCurveTo(0,.38,.18,.58,.36,.32);
-  ctx.bezierCurveTo(.50,.08,.23,-.22,0,-.42);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle='#7fcbd7';ctx.strokeStyle='#fbffff';ctx.lineWidth=.06;ctx.beginPath();ctx.moveTo(0,-.28);ctx.bezierCurveTo(-.15,-.12,-.31,.06,-.23,.22);ctx.bezierCurveTo(-.12,.38,0,.26,0,.20);ctx.bezierCurveTo(0,.26,.12,.38,.23,.22);ctx.bezierCurveTo(.31,.06,.15,-.12,0,-.28);ctx.closePath();ctx.fill();ctx.stroke();
  }
  ctx.restore();
 }
 function cubeFaces(c,kind,alpha=1,shrink=1){
- const o=origin(c),r=.489*shrink,dir=camera(),virus=kind==='virus';
+ const o=origin(c),r=.485*shrink,dir=camera(),virus=kind==='virus';
  const vert=v=>project([o[0]+v[0]*r,o[1]+v[1]*r,o[2]+v[2]*r]);
  const faces=[
-  {n:[0,0,1],v:[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],shade:0},
-  {n:[0,1,0],v:[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],shade:1},
-  {n:[1,0,0],v:[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]],shade:2},
-  {n:[0,0,-1],v:[[-1,1,-1],[1,1,-1],[1,-1,-1],[-1,-1,-1]],shade:3},
-  {n:[0,-1,0],v:[[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]],shade:1},
-  {n:[-1,0,0],v:[[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]],shade:2}
+  {n:[0,0,1],v:[[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]]},
+  {n:[0,1,0],v:[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]]},
+  {n:[1,0,0],v:[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]]},
+  {n:[0,0,-1],v:[[-1,1,-1],[1,1,-1],[1,-1,-1],[-1,-1,-1]]},
+  {n:[0,-1,0],v:[[1,-1,-1],[-1,-1,-1],[-1,-1,1],[1,-1,1]]},
+  {n:[-1,0,0],v:[[-1,1,-1],[-1,-1,-1],[-1,-1,1],[-1,1,1]]}
  ];
- const palette=virus?['#4e3b65','#312442','#21152e','#110a1b']:
-                    ['#fffefd','#e9f4f4','#d9e9ea','#b0c6c9'];
- const edge=virus?'#110918':'#93afb6';
+ const base=virus?'#38284a':'#edf8f8';
+ const edge=virus?'#0f0a17':'#89aeb3';
+ const light=[-.46,.32,.83];
+ let anyTop=false;
  for(const f of faces){
   const facing=f.n.reduce((sum,v,i)=>sum+v*dir[i],0);
   if(facing<=.012)continue;
+  const lit=Math.max(-.55,Math.min(.85,f.n[0]*light[0]+f.n[1]*light[1]+f.n[2]*light[2]));
   const corners=f.v.map(vert);
-  polygon(corners,palette[f.shade],edge,virus?1.25:1.08,alpha);
-  // Small inset highlight establishes a premium soft-beveled toy material.
+  const fill=tint(base, virus?(lit*.33-.08):(lit*.26+.02));
+  roundedQuad(corners,fill,edge,virus?1.3:1.06,alpha,Math.max(4.2,scale*.075));
   const faceC=project(o.map((v,i)=>v+f.n[i]*r));
-  const inner=corners.map(p=>({x:faceC.x+(p.x-faceC.x)*.87,y:faceC.y+(p.y-faceC.y)*.87}));
-  polygon(inner,null,virus?'#87709a':'#ffffff',virus?.6:.82,alpha*(virus?.32:.83));
-  faceMark(o,r,f.n,kind,alpha,Math.min(1,Math.max(0,(facing-.012)/.17)));
+  const inner=corners.map(p=>({x:faceC.x+(p.x-faceC.x)*.84,y:faceC.y+(p.y-faceC.y)*.84}));
+  roundedQuad(inner, virus?tint('#4e3b67',lit*.20):tint('#ffffff',lit*.10), virus?'#8d76a6':'#ffffff', virus?.55:.75, alpha*(virus?.34:.86), Math.max(3.4,scale*.062));
+  faceMark(o,r,f.n,kind,alpha,Math.min(1,Math.max(0,(facing-.012)/.16)));
+  if(f.n[2]===1||f.n[1]===1||f.n[0]===1) anyTop=true;
  }
- // Horns/ears live at fixed world-space locations. No camera-facing pop.
- // Show only when the block is exposed above and the top surface is front facing.
+ // Soft grounded cast shadow helps show where the form turns in space.
+ const shadow=project([o[0]+.12,o[1]-.10,-getLevel().dims[2]/2-.52]);
+ ctx.save();ctx.fillStyle=virus?'rgba(47,26,63,.10)':'rgba(95,150,162,.08)';ctx.beginPath();ctx.ellipse(shadow.x,shadow.y+6,scale*.19*shrink,scale*.08*shrink,-.18,0,TAU);ctx.fill();ctx.restore();
  const l=getLevel();
  const above=key([c[0],c[1],c[2]+1]);
  const freeTop=!l.blue.some(q=>key(q)===above)&&!l.gold.some(q=>key(q)===above);
@@ -283,18 +252,12 @@ function cubeFaces(c,kind,alpha=1,shrink=1){
  for(const side of [-1,1]){
   const P=(x,y,z)=>project([o[0]+x*r,o[1]+y*r,o[2]+z*r]);
   if(virus){
-   // Black-violet crystalline horns, just 12% past the voxel boundary.
-   const p1=P(side*.37,.42,1.0),p2=P(side*.71,.42,1.0);
-   const p3=P(side*.54,.08,1.0),tip=P(side*.55,.26,1.26);
-   polygon([p1,p2,tip],'#17101f','#090611',.7,alpha);
-   polygon([p2,p3,tip],'#574368','#191023',.65,alpha);
-   stroke(p2,tip,'#8f76a6',.8,alpha*.65);
+   const p1=P(side*.31,.38,1.0),p2=P(side*.65,.38,1.0),p3=P(side*.49,.11,1.0),tip=P(side*.50,.22,1.24);
+   polygon([p1,p2,tip],'#17101f','#090611',.7,alpha); polygon([p2,p3,tip],'#4f3c63','#1a1323',.65,alpha);
   }else{
-   // Gentle pearl ears remain connected to a square head, not an orb.
-   const p=P(side*.52,.30,1.02),tip=P(side*.52,.30,1.16);
-   const rad=Math.max(1.6,scale*.075*shrink);
-   circle(tip,rad,'#f8ffff',alpha,'#aeced4',.85);
-   circle({x:tip.x+side*.32,y:tip.y-.5},rad*.42,'#f3d3dd',alpha);
+   const ear=P(side*.48,.28,1.12),glow=P(side*.48,.28,1.03);const rad=Math.max(1.8,scale*.07*shrink);
+   circle(ear,rad,'#f9ffff',alpha,'#a8c7cd',.85); circle({x:ear.x+side*.32,y:ear.y-.5},rad*.44,'#f4d3de',alpha);
+   circle(glow,rad*.25,'#ffffff',alpha*.6);
   }
  }
 }
@@ -483,15 +446,15 @@ function draw(now){
  ctx.restore();
 }
 
-function weaponIcon(type){return type==='laser'?`<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="2.5" y="9" width="7" height="10" rx="1.8" fill="#ebfbff" stroke="#8fcde0" stroke-width="1.1"/><rect x="10.5" y="9" width="7" height="10" rx="1.8" fill="#ebfbff" stroke="#8fcde0" stroke-width="1.1"/><rect x="18.5" y="9" width="7" height="10" rx="1.8" fill="#ebfbff" stroke="#8fcde0" stroke-width="1.1"/><path d="M2 14h24" stroke="#3ccfff" stroke-width="2.8" stroke-linecap="round"/><path d="M2 14h24" stroke="#f9feff" stroke-width="1.1" stroke-linecap="round"/></svg>`:`<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="9" width="7" height="10" rx="1.8" fill="#f8e0c5" stroke="#d39a61" stroke-width="1.1"/><rect x="18" y="9" width="7" height="10" rx="1.8" fill="none" stroke="#d7dede" stroke-width="1.1"/><path d="M2 14h8.2" stroke="#e08b39" stroke-width="2.3" stroke-linecap="round"/><circle cx="12.2" cy="14" r="2.6" fill="#e08b39" stroke="#a56428" stroke-width=".8"/><circle cx="12.2" cy="14" r="1.1" fill="#fff3e0"/></svg>`}
+function weaponIcon(type){return type==='laser'?`<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="10" width="22" height="8" rx="4" fill="#effbff" stroke="#8fcde0" stroke-width="1"/><path d="M4 14h20" stroke="#39cfff" stroke-width="2.8" stroke-linecap="round"/><path d="M4 14h20" stroke="#f9feff" stroke-width="1" stroke-linecap="round"/></svg>`:`<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="5.2" fill="#e08b39" stroke="#a56428" stroke-width="1"/><circle cx="14" cy="14" r="1.4" fill="#fff3e0"/><path d="M3 14h6" stroke="#e08b39" stroke-width="2.3" stroke-linecap="round"/></svg>`}
 function hud(){const l=getLevel();$('count').textContent=String(stage+1).padStart(2,'0')+' / '+LEVELS.length;const ch=stage<15?'01 / 導入':stage<35?'02 / 一手先':stage<55?'03 / 立体の形':stage<80?'04 / 三手設計':'05 / 応用試験';$('chapter').textContent=ch;$('title').textContent=l.title;
  $('subtitle').textContent=stage===0?'シアンのレーザーは、一直線に貫通する。':stage===1?'オレンジのショットは、手前の一個だけ。':'黒むらさきのバイキンを消して、白いともだちは守ろう。';$('progress').style.width=(100*(stage+1)/LEVELS.length)+'%';$('prev').disabled=stage===0;$('next').disabled=stage>=highest;
- $('loadout').innerHTML=l.weapons.map((type,i)=>`<button class="weapon ${type} ${i===selected?'selected':''} ${aims[i]?'done':''}" data-i="${i}" aria-label="${i+1}発目 ${type==='laser'?'レーザー貫通':'ショット単発'} ${aims[i]?'照準済':'未設定'}" ${shotsDone?'disabled':''}><span class="weapon-num">${i+1}</span><span class="weapon-icon">${weaponIcon(type)}</span><span class="weapon-copy"><span class="weapon-type">${type==='laser'?'LASER':'SHOT'}</span><span class="weapon-state">${aims[i]?'面をロック':i===selected?'面をタップ':'まだ未設定'}</span></span></button>`).join('');
+ $('loadout').innerHTML=l.weapons.map((type,i)=>`<button class="weapon ${type} ${i===selected?'selected':''} ${aims[i]?'done':''}" data-i="${i}" aria-label="${i+1}発目 ${type==='laser'?'レーザー貫通':'ショット単発'} ${aims[i]?'照準済':'未設定'}" ${shotsDone?'disabled':''}><span class="weapon-num">${i+1}</span><span class="weapon-icon">${weaponIcon(type)}</span><span class="weapon-mark">${aims[i]?'●':i===selected?'○':' '}</span></button>`).join('');
  const ready=aims.every(Boolean);$('fireBtn').disabled=!ready&&!shotsDone;
  $('fireBtn').classList.toggle('next',success);
  $('fireBtn').textContent=success?(stage===LEVELS.length-1?`${LEVELS.length}問クリア！ ↻`:'次のステージへ →'):shotsDone?(settled?'照準を直す':'射撃中…'):(ready?`${l.weapons.length} 発、発射する`:'面をタップして狙おう');
- $('arenaHint').textContent=success?'完璧。ウイルスだけを消しきった。':shotsDone?(settled?'狙いを見直して、もう一度。':'レーザーは貫通、ショットは手前の一個だけ'):aims.every(Boolean)?'どこから撃つか、最後に確認しよう':`「${l.weapons[selected]==='laser'?'LASER：一直線に貫通':'SHOT：最初の一個だけ'}」を選択中`;
- $('resetBtn').textContent=shotsDone?'戻す':'照準クリア';
+ $('arenaHint').textContent=success?'完璧。バイキンだけを消しきった。':shotsDone?(settled?'狙いを見直して、もう一度。':'レーザーは貫通、ショットは手前の一個だけ'):aims.every(Boolean)?'発射前に、向きをひと呼吸だけ確認。':`${selected+1}手目を選択中`;
+ $('resetBtn').textContent=shotsDone?'戻す':(aims[selected]?'この手を消す':aims.some(Boolean)?'全部消す':'照準クリア');
  $('notice').classList.toggle('show',settled);$('notice').classList.toggle('bad',settled&&!success);
  if(settled){$('noticeTitle').textContent=success?'CLEAR!':report.goldHit.length?'ともだちに当たった！':report.wasted?'空振りがあった！':'ウイルスが残った';$('noticeDesc').textContent=success?'決めた射線が、ぴったり決まった。':report.goldHit.length?'ともだちキューブには当てず、ウイルスだけを消そう':report.wasted?'すべての武器を使って消そう':`${report.blueLeft.length}体、まだ残っている`}
 }
@@ -530,9 +493,9 @@ function planFire(){
 canvas.addEventListener('pointerdown',e=>{ensureAudio();pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>5)pointer.moved=true;if(pointer.moved){targetView=null;rawYaw+=dx*.0125;rawPitch-=dy*.0115;const SNAP=Math.PI/15;const iy=Math.round(rawYaw/SNAP),ip=Math.round(rawPitch/SNAP);if(iy!==lastTickYaw||ip!==lastTickPitch){lastTickYaw=iy;lastTickPitch=ip;const now=performance.now();if(now-lastRotSound>31){lastRotSound=now;soundRotate((iy%6===0)||(ip%6===0));}}}});
 canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.moved&&!shotsDone){const r=canvas.getBoundingClientRect(),a=nearestFace(e.clientX-r.left,e.clientY-r.top);if(a)setAim(selected,a)}pointer=null});canvas.addEventListener('pointercancel',()=>pointer=null);
-$('loadout').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)setSelected(Number(b.dataset.i))});
+$('loadout').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b||shotsDone)return;const i=Number(b.dataset.i);if(i===selected&&aims[i]){aims[i]=null;tapSound();hud();return}setSelected(i)});
 $('fireBtn').addEventListener('click',planFire);
-$('resetBtn').addEventListener('click',()=>{if(shotsDone){shotSeq++;shotsDone=false;settled=false;success=false;report=null;arena.classList.remove('firing','impact');hud()}else{aims=getLevel().weapons.map(()=>null);selected=0;aimPulse.aim=null;hud();tapSound()}});
+$('resetBtn').addEventListener('click',()=>{if(shotsDone){shotSeq++;shotsDone=false;settled=false;success=false;report=null;arena.classList.remove('firing','impact');hud()}else if(aims[selected]){aims[selected]=null;aimPulse.aim=null;hud();tapSound()}else{aims=getLevel().weapons.map(()=>null);selected=0;aimPulse.aim=null;hud();tapSound()}});
 $('viewBtn').addEventListener('click',()=>{const nearest=(v,t)=>v+((((t-v+Math.PI)%TAU)+TAU)%TAU-Math.PI);targetView=[nearest(rawYaw,defaultYaw),nearest(rawPitch,defaultPitch)];tapSound()});
 function soundHud(){$('soundBtn').style.color=soundOn?'#418e84':'#b2bfba';$('soundBtn').setAttribute('aria-pressed',String(soundOn))}
 $('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;save();soundHud();if(soundOn){ensureAudio();tapSound()}});
