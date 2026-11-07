@@ -2,17 +2,20 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1">
 <meta name="theme-color" content="#f6f9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — CUBE CREATURES v13</title>
+<title>LASER CUBE — CUBE CREATURES v14</title>
 <style>
 :root{--bg:#f7f9f8;--ink:#193941;--mute:#7c9498;--mint:#239bc0;--mint-light:#d8f4ff;--warm:#db8737;--line:#dbe7e8;--virus:#4b395e;--ally:#ffffff;--ally-line:#a7bec0;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);overscroll-behavior:none}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);overscroll-behavior:none;overflow:hidden;touch-action:none}
+html{position:fixed;inset:0;-webkit-overflow-scrolling:auto}
+body{position:fixed;inset:0;-webkit-user-select:none;user-select:none}
+body,main,.arena,#scene{overscroll-behavior:none;-webkit-touch-callout:none}
 body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}
 button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:2px solid #319d91;outline-offset:2px}
-.app{width:min(100%,520px);height:100dvh;min-height:490px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 9px) 14px calc(env(safe-area-inset-bottom) + 9px);display:flex;flex-direction:column;gap:8px}
+.app{width:min(100%,520px);height:100dvh;min-height:0;margin:0 auto;padding:calc(env(safe-area-inset-top) + 9px) 14px calc(env(safe-area-inset-bottom) + 9px);display:flex;flex-direction:column;gap:8px;overflow:hidden}
 .top{display:flex;align-items:center;justify-content:space-between;flex:none;min-height:41px;padding:0 5px}
 .logo{font-size:18px;letter-spacing:.105em;font-weight:890}.logo b{color:var(--virus)}
 .right{display:flex;gap:2px}.iconbtn{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:13px;background:transparent;color:#769793}.iconbtn:active{background:#e6f0ed}.iconbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -171,7 +174,7 @@ function polygon(ps,fill,edge,width=1,opacity=1){ctx.save();ctx.globalAlpha=opac
 function circle(p,r,fill,opacity=1,edge=null,width=1){ctx.save();ctx.globalAlpha=opacity;ctx.beginPath();ctx.arc(p.x,p.y,r,0,TAU);if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
 function mixHex(a,b,t){const pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);const ar=(pa>>16)&255,ag=(pa>>8)&255,ab=pa&255,br=(pb>>16)&255,bg=(pb>>8)&255,bb=pb&255;const m=v=>Math.max(0,Math.min(255,Math.round(v)));const rr=m(ar+(br-ar)*t),rg=m(ag+(bg-ag)*t),rb=m(ab+(bb-ab)*t);return '#'+((1<<24)+(rr<<16)+(rg<<8)+rb).toString(16).slice(1)}
 function tint(c,t){return t>=0?mixHex(c,'#ffffff',Math.min(1,t)):mixHex(c,'#000000',Math.min(1,-t))}
-function roundedQuad(ps,fill,edge,width=1,opacity=1,r=6){ctx.save();ctx.globalAlpha=opacity;const n=ps.length;const ds=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);ctx.beginPath();for(let i=0;i<n;i++){const prev=ps[(i-1+n)%n],cur=ps[i],next=ps[(i+1)%n];const rr=Math.min(r,ds(prev,cur)*.32,ds(cur,next)*.32);const p1={x:cur.x+(prev.x-cur.x)*rr/ds(prev,cur),y:cur.y+(prev.y-cur.y)*rr/ds(prev,cur)};const p2={x:cur.x+(next.x-cur.x)*rr/ds(next,cur),y:cur.y+(next.y-cur.y)*rr/ds(next,cur)};if(i===0)ctx.moveTo(p1.x,p1.y);else ctx.lineTo(p1.x,p1.y);ctx.quadraticCurveTo(cur.x,cur.y,p2.x,p2.y)}ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
+function roundedQuad(ps,fill,edge,width=1,opacity=1,r=6){ctx.save();ctx.globalAlpha=opacity;const n=ps.length;const ds=(a,b)=>Math.max(.001,Math.hypot(a.x-b.x,a.y-b.y));ctx.beginPath();for(let i=0;i<n;i++){const prev=ps[(i-1+n)%n],cur=ps[i],next=ps[(i+1)%n];const rr=Math.min(r,ds(prev,cur)*.32,ds(cur,next)*.32);const p1={x:cur.x+(prev.x-cur.x)*rr/ds(prev,cur),y:cur.y+(prev.y-cur.y)*rr/ds(prev,cur)};const p2={x:cur.x+(next.x-cur.x)*rr/ds(next,cur),y:cur.y+(next.y-cur.y)*rr/ds(next,cur)};if(i===0)ctx.moveTo(p1.x,p1.y);else ctx.lineTo(p1.x,p1.y);ctx.quadraticCurveTo(cur.x,cur.y,p2.x,p2.y)}ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(edge){ctx.strokeStyle=edge;ctx.lineWidth=width;ctx.stroke()}ctx.restore()}
 function print(p,t,color,size=12,weight=800){ctx.save();ctx.font=`${weight} ${size}px -apple-system, BlinkMacSystemFont, sans-serif`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,p.x,p.y);ctx.restore()}
 function resize(){const r=arena.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);dpr=Math.min(2.5,window.devicePixelRatio||1);canvas.width=W*dpr;canvas.height=H*dpr;const d=getLevel().dims;scale=Math.min(W/(.66*(d[0]+d[1])+1.35),H/(.55*(d[0]+d[1]+d[2])+2.55),84);if(H<445)scale*=.81;else if(H<515)scale*=.92;cx=W*.50;cy=H<445?H*.475:H<515?H*.495:H*.525}
 function drawFrame(){const d=getLevel().dims,mins=d.map(v=>-v/2),maxs=d.map(v=>v/2);
@@ -187,11 +190,12 @@ function faceMark(o,r,normal,kind,alpha,faceOpacity){
  const U=project(o.map((val,i)=>val+normal[i]*r*1.012+u[i]*r*.90));
  const V=project(o.map((val,i)=>val+normal[i]*r*1.012+v[i]*r*.90));
  const det=(U.x-C.x)*(V.y-C.y)-(V.x-C.x)*(U.y-C.y);
- if(Math.abs(det)<9)return;
+ const faceArea=Math.abs(det);if(faceArea<1)return;
+ const areaFade=Math.min(1,Math.max(0,(faceArea-1)/130));
  ctx.save();
  ctx.translate(C.x,C.y);
- ctx.transform((U.x-C.x)/2,(U.y-C.y)/2,(V.x-C.x)/2,(V.y-C.y)/2,0,0);
- ctx.globalAlpha=alpha*(isFace?(.18+.82*faceOpacity):.58);
+ ctx.transform((U.x-C.x)/1.43,(U.y-C.y)/1.43,(V.x-C.x)/1.43,(V.y-C.y)/1.43,0,0);
+ ctx.globalAlpha=alpha*areaFade*(isFace?(.18+.82*faceOpacity):.58);
  if(isFace){
   if(kind==='virus'){
    ctx.fillStyle='#24152f';ctx.beginPath();ctx.roundRect(-.86,-.69,1.72,1.36,.30);ctx.fill();
@@ -205,6 +209,20 @@ function faceMark(o,r,normal,kind,alpha,faceOpacity){
    ctx.fillStyle='#f2c6d0'; for(const x of[-.70,.70]){ctx.beginPath();ctx.ellipse(x,-.04,.11,.07,0,0,Math.PI*2);ctx.fill();}
    ctx.strokeStyle='#7ca1aa';ctx.lineWidth=.075;ctx.beginPath();ctx.moveTo(-.22,-.12);ctx.quadraticCurveTo(0,-.28,.22,-.12);ctx.stroke();
    ctx.fillStyle='#8fd8e7';ctx.beginPath();ctx.moveTo(0,.37);ctx.bezierCurveTo(-.18,.50,-.22,.28,0,.29);ctx.bezierCurveTo(.22,.28,.18,.50,0,.37);ctx.fill();
+  }
+ }else if(normal[0]!==0){
+  // An actual profile on the cube side. The front retains two eyes; the side has one.
+  if(kind==='virus'){
+   ctx.fillStyle='#f5b9d7';ctx.beginPath();ctx.ellipse(.03,.14,.22,.245,0,0,TAU);ctx.fill();
+   ctx.fillStyle='#5f2146';ctx.beginPath();ctx.ellipse(.045,.12,.105,.14,0,0,TAU);ctx.fill();
+   ctx.strokeStyle='#160d22';ctx.lineWidth=.125;ctx.beginPath();ctx.moveTo(-.27,.46);ctx.lineTo(.25,.29);ctx.stroke();
+   ctx.strokeStyle='#f2a5ca';ctx.lineWidth=.09;ctx.beginPath();ctx.moveTo(-.25,-.28);ctx.quadraticCurveTo(.08,-.45,.30,-.28);ctx.stroke();
+   ctx.fillStyle='#fff9ff';ctx.beginPath();ctx.moveTo(.05,-.31);ctx.lineTo(.21,-.49);ctx.lineTo(.28,-.30);ctx.closePath();ctx.fill();
+  }else{
+   ctx.fillStyle='#334c5b';ctx.beginPath();ctx.ellipse(.02,.13,.20,.26,0,0,TAU);ctx.fill();
+   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(-.045,.235,.045,0,TAU);ctx.fill();
+   ctx.fillStyle='#edb7cb';ctx.beginPath();ctx.ellipse(-.30,-.065,.20,.11,0,0,TAU);ctx.fill();
+   ctx.strokeStyle='#7198a4';ctx.lineWidth=.105;ctx.beginPath();ctx.moveTo(-.11,-.18);ctx.quadraticCurveTo(.16,-.39,.34,-.16);ctx.stroke();
   }
  }else if(kind==='virus'){
   ctx.strokeStyle='#8f78a7';ctx.lineWidth=.10;ctx.beginPath();ctx.moveTo(-.28,.24);ctx.lineTo(.08,-.12);ctx.moveTo(-.02,.24);ctx.lineTo(.30,-.08);ctx.stroke();
@@ -231,15 +249,16 @@ function cubeFaces(c,kind,alpha=1,shrink=1){
  let anyTop=false;
  for(const f of faces){
   const facing=f.n.reduce((sum,v,i)=>sum+v*dir[i],0);
-  if(facing<=.012)continue;
+  if(facing<=0)continue;
+  const faceFade=Math.min(1,Math.max(0,facing/.14));
   const lit=Math.max(-.55,Math.min(.85,f.n[0]*light[0]+f.n[1]*light[1]+f.n[2]*light[2]));
   const corners=f.v.map(vert);
   const fill=tint(base, virus?(lit*.33-.08):(lit*.26+.02));
-  roundedQuad(corners,fill,edge,virus?1.3:1.06,alpha,Math.max(4.2,scale*.075));
+  roundedQuad(corners,fill,edge,virus?1.3:1.06,alpha*faceFade,Math.max(4.2,scale*.075));
   const faceC=project(o.map((v,i)=>v+f.n[i]*r));
   const inner=corners.map(p=>({x:faceC.x+(p.x-faceC.x)*.84,y:faceC.y+(p.y-faceC.y)*.84}));
-  roundedQuad(inner, virus?tint('#4e3b67',lit*.20):tint('#ffffff',lit*.10), virus?'#8d76a6':'#ffffff', virus?.55:.75, alpha*(virus?.34:.86), Math.max(3.4,scale*.062));
-  faceMark(o,r,f.n,kind,alpha,Math.min(1,Math.max(0,(facing-.012)/.16)));
+  roundedQuad(inner, virus?tint('#4e3b67',lit*.20):tint('#ffffff',lit*.10), virus?'#8d76a6':'#ffffff', virus?.55:.75, alpha*faceFade*(virus?.34:.86), Math.max(3.4,scale*.062));
+  faceMark(o,r,f.n,kind,alpha*faceFade,Math.min(1,Math.max(0,facing/.16)));
   if(f.n[2]===1||f.n[1]===1||f.n[0]===1) anyTop=true;
  }
  // Soft grounded cast shadow helps show where the form turns in space.
@@ -248,16 +267,17 @@ function cubeFaces(c,kind,alpha=1,shrink=1){
  const l=getLevel();
  const above=key([c[0],c[1],c[2]+1]);
  const freeTop=!l.blue.some(q=>key(q)===above)&&!l.gold.some(q=>key(q)===above);
- if(!freeTop||dir[2]<-.04||alpha<.03)return;
+ if(!freeTop||dir[2]<-.15||alpha<.03)return;
+ const topFade=Math.min(1,Math.max(0,(dir[2]+.15)/.28));
  for(const side of [-1,1]){
   const P=(x,y,z)=>project([o[0]+x*r,o[1]+y*r,o[2]+z*r]);
   if(virus){
    const p1=P(side*.31,.38,1.0),p2=P(side*.65,.38,1.0),p3=P(side*.49,.11,1.0),tip=P(side*.50,.22,1.24);
-   polygon([p1,p2,tip],'#17101f','#090611',.7,alpha); polygon([p2,p3,tip],'#4f3c63','#1a1323',.65,alpha);
+   polygon([p1,p2,tip],'#17101f','#090611',.7,alpha*topFade); polygon([p2,p3,tip],'#4f3c63','#1a1323',.65,alpha*topFade);
   }else{
    const ear=P(side*.48,.28,1.12),glow=P(side*.48,.28,1.03);const rad=Math.max(1.8,scale*.07*shrink);
-   circle(ear,rad,'#f9ffff',alpha,'#a8c7cd',.85); circle({x:ear.x+side*.32,y:ear.y-.5},rad*.44,'#f4d3de',alpha);
-   circle(glow,rad*.25,'#ffffff',alpha*.6);
+   circle(ear,rad,'#f9ffff',alpha*topFade,'#a8c7cd',.85); circle({x:ear.x+side*.32,y:ear.y-.5},rad*.44,'#f4d3de',alpha*topFade);
+   circle(glow,rad*.25,'#ffffff',alpha*.6*topFade);
   }
  }
 }
@@ -414,7 +434,7 @@ function aimCornerPoint(aim){
  const corners=[[-.48,-.48],[.48,-.48],[.48,.48],[-.48,.48]].map(([u,v])=>{const p=mid.slice();p[other[0]]+=u;p[other[1]]+=v;return project(p)});
  const top=corners.reduce((best,p)=>p.y<best.y-.8 || (Math.abs(p.y-best.y)<.8&&p.x>best.x)?p:best,corners[0]);
  // A corner badge places the aim off the creature's central facial features.
- return {x:top.x+(top.x-center.x)*.10,y:top.y+(top.y-center.y)*.10};
+ return {x:top.x+(top.x-center.x)*.38,y:top.y+(top.y-center.y)*.38};
 }
 function drawnAims(){
  for(let i=0;i<aims.length;i++){
@@ -422,7 +442,7 @@ function drawnAims(){
   const isFront=camera()[aim.axis]*aim.sign>.05;if(!isFront)continue;
   const type=getLevel().weapons[i],color=type==='laser'?'#249fce':'#d38641',p=aimCornerPoint(aim);
   ctx.save();ctx.shadowColor='rgba(21,44,51,.16)';ctx.shadowBlur=4;ctx.shadowOffsetY=1;
-  circle(p,8.2,'#ffffff',.96,color,1.8);ctx.restore();
+  circle(p,8.1,'#ffffff',.98,color,1.55);ctx.restore();
   print({x:p.x,y:p.y+.2},String(i+1),color,10,900);
  }
 }
@@ -432,10 +452,9 @@ function drawFaceTargets(){hitAreas=[];if(shotsDone)return;const d=getLevel().di
  const other=[0,1,2].filter(i=>i!==axis),A=d[other[0]],B=d[other[1]];
  for(let a=0;a<A;a++)for(let b=0;b<B;b++){
  const aim={axis,sign,a,b},mid=faceP(aim,.54),corners=[[-.49,-.49],[.49,-.49],[.49,.49],[-.49,.49]].map(([u,v])=>{const p=mid.slice();p[other[0]]+=u;p[other[1]]+=v;return project(p)});
- const sel=isSameAim(aim,aims[selected]);
- const wt=getLevel().weapons[selected];
- polygon(corners,sel?(wt==='laser'?'rgba(86,204,255,.15)':'rgba(233,151,82,.14)'):'rgba(255,255,255,.10)',sel?(wt==='laser'?'rgba(67,176,221,.44)':'rgba(216,138,61,.42)'):'rgba(134,180,171,.16)',.75,1);
- const p=project(mid);if(!sel){circle(p,Math.max(2.0,scale*.056),'#fff',.88,'rgba(114,145,153,.30)',.8)}
+ // Target polygons are invisible hit zones. No dots, fill, or grid drawn on faces:
+ // facial expressions must always remain unobstructed while turning.
+ const p=project(mid);
  hitAreas.push({aim,corners,depth:p.depth,center:p});
  }
  }
@@ -447,7 +466,11 @@ function draw(now){
  const SNAP=Math.PI/15;
  if(targetView){rawYaw=mix(rawYaw,targetView[0],.27);rawPitch=mix(rawPitch,targetView[1],.27);
   if(Math.abs(rawYaw-targetView[0])+Math.abs(rawPitch-targetView[1])<.002){rawYaw=targetView[0];rawPitch=targetView[1];targetView=null}}
- yaw=Math.round(rawYaw/SNAP)*SNAP;pitch=Math.round(rawPitch/SNAP)*SNAP;
+ const stepYaw=Math.round(rawYaw/SNAP)*SNAP,stepPitch=Math.round(rawPitch/SNAP)*SNAP;
+ // Critically damped short settle; each click remains distinct without frame-to-frame teleportation.
+ yaw+=(stepYaw-yaw)*.58; pitch+=(stepPitch-pitch)*.58;
+ if(Math.abs(stepYaw-yaw)<.00015)yaw=stepYaw;
+ if(Math.abs(stepPitch-pitch)<.00015)pitch=stepPitch;
  const t=currentTiming(now);
  ctx.save();
  if(shotsDone&&report&&t.i>=0&&t.i<report.steps.length&&report.steps[t.i].type==='shot'){
@@ -506,8 +529,8 @@ function planFire(){
  },aims.length*STEP_MS+60);
 }
 
-canvas.addEventListener('pointerdown',e=>{ensureAudio();pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId)});
-canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>5)pointer.moved=true;if(pointer.moved){targetView=null;rawYaw+=dx*.0125;rawPitch-=dy*.0115;const SNAP=Math.PI/15;const iy=Math.round(rawYaw/SNAP),ip=Math.round(rawPitch/SNAP);if(iy!==lastTickYaw||ip!==lastTickPitch){lastTickYaw=iy;lastTickPitch=ip;const now=performance.now();if(now-lastRotSound>31){lastRotSound=now;soundRotate((iy%6===0)||(ip%6===0));}}}});
+canvas.addEventListener('pointerdown',e=>{if(e.cancelable)e.preventDefault();ensureAudio();pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(e.cancelable)e.preventDefault();const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>5)pointer.moved=true;if(pointer.moved){targetView=null;rawYaw+=dx*.0125;rawPitch-=dy*.0115;const SNAP=Math.PI/15;const iy=Math.round(rawYaw/SNAP),ip=Math.round(rawPitch/SNAP);if(iy!==lastTickYaw||ip!==lastTickPitch){lastTickYaw=iy;lastTickPitch=ip;const now=performance.now();if(now-lastRotSound>31){lastRotSound=now;soundRotate((iy%6===0)||(ip%6===0));}}}});
 function tapAim(aim){
  if(shotsDone||!aim)return;
  // The same cell always cancels the already placed aim, even after auto-advancing.
@@ -523,7 +546,12 @@ function aimAtTap(x,y){
  }
  return nearestFace(x,y);
 }
-canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.moved&&!shotsDone){const r=canvas.getBoundingClientRect(),a=aimAtTap(e.clientX-r.left,e.clientY-r.top);if(a)tapAim(a)}pointer=null});canvas.addEventListener('pointercancel',()=>pointer=null);
+canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(e.cancelable)e.preventDefault();if(!pointer.moved&&!shotsDone){const r=canvas.getBoundingClientRect(),a=aimAtTap(e.clientX-r.left,e.clientY-r.top);if(a)tapAim(a)}pointer=null});canvas.addEventListener('pointercancel',()=>pointer=null);
+// Safari can scroll the whole page when a gesture moves beyond the initial hit area.
+// Explicitly suppress that native gesture while the puzzle is being manipulated.
+arena.addEventListener('touchmove',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
+canvas.addEventListener('touchstart',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',e=>{if(pointer&&e.cancelable)e.preventDefault()},{passive:false});
 $('loadout').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b||shotsDone)return;const i=Number(b.dataset.i);if(i===selected&&aims[i]){aims[i]=null;tapSound();hud();return}setSelected(i)});
 $('fireBtn').addEventListener('click',planFire);
 $('resetBtn').addEventListener('click',()=>{if(shotsDone){shotSeq++;shotsDone=false;settled=false;success=false;report=null;arena.classList.remove('firing','impact');hud()}else if(aims[selected]){aims[selected]=null;aimPulse.aim=null;hud();tapSound()}else{aims=getLevel().weapons.map(()=>null);selected=0;aimPulse.aim=null;hud();tapSound()}});
