@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#f6f9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — CUBE CREATURES v12</title>
+<title>LASER CUBE — CUBE CREATURES v13</title>
 <style>
 :root{--bg:#f7f9f8;--ink:#193941;--mute:#7c9498;--mint:#239bc0;--mint-light:#d8f4ff;--warm:#db8737;--line:#dbe7e8;--virus:#4b395e;--ally:#ffffff;--ally-line:#a7bec0;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -37,7 +37,7 @@ button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visibl
 @keyframes land{0%{scale:.93}100%{scale:1}}
 .weapon-num{font-size:10px;font-weight:900;color:#88a4a8;line-height:1.05}
 .weapon-icon{width:28px;height:28px;flex:none;display:grid;place-items:center}
-.weapon-icon svg{width:28px;height:28px;display:block}.weapon-copy{display:none}.weapon-mark{display:block;font-size:10px;line-height:1;color:#88a4a8;min-height:10px}.weapon.done .weapon-mark{color:#3fa56c}.shot .weapon-mark{color:#c9843e}.laser .weapon-mark{color:#2a9dc3}
+.weapon-icon svg{width:30px;height:30px;display:block}.weapon-copy{display:none}.weapon-mark{display:block;font-size:10px;line-height:1;color:#88a4a8;min-height:10px}.weapon.done .weapon-mark{color:#3fa56c}.shot .weapon-mark{color:#c9843e}.laser .weapon-mark{color:#2a9dc3}
 .arena-hint{position:absolute;bottom:69px;left:10px;right:10px;text-align:center;font-size:10px;color:#8ba6a1;pointer-events:none;line-height:1.35;min-height:15px}
 .bottom{position:absolute;bottom:11px;left:11px;right:11px;display:flex;gap:8px;align-items:center;height:47px}
 .reset{height:47px;padding:0 13px;flex:none;border:1px solid #d9e8e4;background:rgba(255,255,255,.88);color:#6d928d;font-weight:780;font-size:12px;border-radius:14px}
@@ -74,7 +74,7 @@ const defaultYaw=.72,defaultPitch=.63;
 let yaw=defaultYaw,pitch=defaultPitch,rawYaw=defaultYaw,rawPitch=defaultPitch,targetView=null,stage=0,highest=0,soundOn=true,audio=null;
 let selected=0,aims=[],shotsDone=false,settled=false,success=false,report=null,startTime=0,frame=0,hitAreas=[],pointer=null,history=[],shotSeq=0;
 let aimPulse={start:0,aim:null,weapon:0},clearTime=0,lastTickYaw=Math.round(defaultYaw/(Math.PI/15)),lastTickPitch=Math.round(defaultPitch/(Math.PI/15)),lastRotSound=0;
-const KEY='LASER_CUBE_V10'; // preserve progress from v11
+const KEY='LASER_CUBE_V10'; // Keep stage and sound preferences from the published game
 try{const j=JSON.parse(localStorage.getItem(KEY)||'{}');stage=Math.max(0,Math.min(LEVELS.length-1,j.stage||0));highest=Math.max(0,Math.min(LEVELS.length-1,j.highest||0));soundOn=j.sound!==false}catch(e){}
 const key=p=>p.join(','),clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),mix=(a,b,t)=>a+(b-a)*t;
 const comp=d=>[d[0],d[1],d[2]];
@@ -194,15 +194,15 @@ function faceMark(o,r,normal,kind,alpha,faceOpacity){
  ctx.globalAlpha=alpha*(isFace?(.18+.82*faceOpacity):.58);
  if(isFace){
   if(kind==='virus'){
-   ctx.fillStyle='#1c1028';ctx.beginPath();ctx.roundRect(-.62,-.54,1.24,1.08,.22);ctx.fill();
-   ctx.fillStyle='#ffdaec'; for(const x of[-.29,.29]){ctx.beginPath();ctx.ellipse(x,.13,.145,.17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5f1940';ctx.beginPath();ctx.arc(x,.13,.07,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(x-.03,.18,.023,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffdaec';}
+   ctx.fillStyle='#24152f';ctx.beginPath();ctx.roundRect(-.86,-.69,1.72,1.36,.30);ctx.fill();
+   ctx.fillStyle='#ffdaec'; for(const x of[-.45,.45]){ctx.beginPath();ctx.ellipse(x,.17,.18,.20,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5f1940';ctx.beginPath();ctx.arc(x,.15,.088,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(x-.045,.22,.034,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffdaec';}
    ctx.strokeStyle='#38192f';ctx.lineWidth=.09;ctx.beginPath();ctx.moveTo(-.43,-.08);ctx.lineTo(-.13,.02);ctx.moveTo(.43,-.08);ctx.lineTo(.13,.02);ctx.stroke();
    ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(-.14,-.19);ctx.lineTo(-.05,-.34);ctx.lineTo(.01,-.20);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(.14,-.19);ctx.lineTo(.05,-.34);ctx.lineTo(-.01,-.20);ctx.closePath();ctx.fill();
    ctx.strokeStyle='#ff8eb7';ctx.lineWidth=.08;ctx.beginPath();ctx.moveTo(-.23,-.18);ctx.quadraticCurveTo(0,-.33,.23,-.18);ctx.stroke();
   }else{
-   ctx.fillStyle='#fbffff';ctx.beginPath();ctx.roundRect(-.63,-.54,1.26,1.08,.26);ctx.fill();
-   ctx.fillStyle='#324d58'; for(const x of[-.30,.30]){ctx.beginPath();ctx.ellipse(x,.11,.13,.17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(x-.03,.15,.025,0,Math.PI*2);ctx.fill();ctx.fillStyle='#324d58';}
-   ctx.fillStyle='#f2c6d0'; for(const x of[-.50,.50]){ctx.beginPath();ctx.ellipse(x,-.02,.12,.08,0,0,Math.PI*2);ctx.fill();}
+   ctx.fillStyle='#fbffff';ctx.beginPath();ctx.roundRect(-.87,-.72,1.74,1.44,.35);ctx.fill();
+   ctx.fillStyle='#324d58'; for(const x of[-.45,.45]){ctx.beginPath();ctx.ellipse(x,.16,.16,.19,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(x-.04,.22,.038,0,Math.PI*2);ctx.fill();ctx.fillStyle='#324d58';}
+   ctx.fillStyle='#f2c6d0'; for(const x of[-.70,.70]){ctx.beginPath();ctx.ellipse(x,-.04,.11,.07,0,0,Math.PI*2);ctx.fill();}
    ctx.strokeStyle='#7ca1aa';ctx.lineWidth=.075;ctx.beginPath();ctx.moveTo(-.22,-.12);ctx.quadraticCurveTo(0,-.28,.22,-.12);ctx.stroke();
    ctx.fillStyle='#8fd8e7';ctx.beginPath();ctx.moveTo(0,.37);ctx.bezierCurveTo(-.18,.50,-.22,.28,0,.29);ctx.bezierCurveTo(.22,.28,.18,.50,0,.37);ctx.fill();
   }
@@ -398,8 +398,8 @@ function drawRay(now,t){
 function drawAimPulse(now){
  if(!aimPulse.aim||shotsDone)return;
  const e=(now-aimPulse.start)/420;if(e<0||e>1)return;
- const p=project(faceP(aimPulse.aim,.55)),t=smooth(e),type=getLevel().weapons[aimPulse.weapon];
- circle(p,11+18*t,null,(1-e)*.72,type==='laser'?'#42cfff':'#dd8a3b',2.0);
+ const p=aimCornerPoint(aimPulse.aim),t=smooth(e),type=getLevel().weapons[aimPulse.weapon];
+ circle(p,8+10*t,null,(1-e)*.55,type==='laser'?'#42cfff':'#dd8a3b',1.7);
 }
 function drawCompletion(t){
  if(!success||!settled)return;
@@ -408,9 +408,23 @@ function drawCompletion(t){
 }
 
 function inPoly(pt,ps){let inside=false;for(let i=0,j=ps.length-1;i<ps.length;j=i++){const a=ps[i],b=ps[j];if(((a.y>pt.y)!==(b.y>pt.y))&&(pt.x<(b.x-a.x)*(pt.y-a.y)/(b.y-a.y)+a.x))inside=!inside}return inside}
-function drawnAims(){const d=getLevel().dims;
- for(let i=0;i<aims.length;i++){const aim=aims[i];if(!aim)continue;const type=getLevel().weapons[i],p=project(faceP(aim,.535));const isFront=camera()[aim.axis]*aim.sign>.05;if(!isFront)continue;const active=i===selected&&!shotsDone,color=type==='laser'?'#34bced':'#da8838';
- circle(p,active?13:10,'#fff',.95,color,active?2.6:1.9);if(type==='laser'){stroke({x:p.x-5,y:p.y},{x:p.x+5,y:p.y},color,2.1,1);circle(p,2.3,color)}else{circle(p,4.3,color,1);circle({x:p.x,y:p.y},1.5,'#fff7ea',.95)}print({x:p.x+11,y:p.y-11},String(i+1),'#5d827b',9,900);}
+function aimCornerPoint(aim){
+ const d=getLevel().dims,other=[0,1,2].filter(i=>i!==aim.axis),mid=faceP(aim,.54);
+ const center=project(mid);
+ const corners=[[-.48,-.48],[.48,-.48],[.48,.48],[-.48,.48]].map(([u,v])=>{const p=mid.slice();p[other[0]]+=u;p[other[1]]+=v;return project(p)});
+ const top=corners.reduce((best,p)=>p.y<best.y-.8 || (Math.abs(p.y-best.y)<.8&&p.x>best.x)?p:best,corners[0]);
+ // A corner badge places the aim off the creature's central facial features.
+ return {x:top.x+(top.x-center.x)*.10,y:top.y+(top.y-center.y)*.10};
+}
+function drawnAims(){
+ for(let i=0;i<aims.length;i++){
+  const aim=aims[i];if(!aim)continue;
+  const isFront=camera()[aim.axis]*aim.sign>.05;if(!isFront)continue;
+  const type=getLevel().weapons[i],color=type==='laser'?'#249fce':'#d38641',p=aimCornerPoint(aim);
+  ctx.save();ctx.shadowColor='rgba(21,44,51,.16)';ctx.shadowBlur=4;ctx.shadowOffsetY=1;
+  circle(p,8.2,'#ffffff',.96,color,1.8);ctx.restore();
+  print({x:p.x,y:p.y+.2},String(i+1),color,10,900);
+ }
 }
 function drawFaceTargets(){hitAreas=[];if(shotsDone)return;const d=getLevel().dims,dir=camera();
  for(let axis=0;axis<3;axis++)for(const sign of [-1,1]){
@@ -446,7 +460,9 @@ function draw(now){
  ctx.restore();
 }
 
-function weaponIcon(type){return type==='laser'?`<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="10" width="22" height="8" rx="4" fill="#effbff" stroke="#8fcde0" stroke-width="1"/><path d="M4 14h20" stroke="#39cfff" stroke-width="2.8" stroke-linecap="round"/><path d="M4 14h20" stroke="#f9feff" stroke-width="1" stroke-linecap="round"/></svg>`:`<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="5.2" fill="#e08b39" stroke="#a56428" stroke-width="1"/><circle cx="14" cy="14" r="1.4" fill="#fff3e0"/><path d="M3 14h6" stroke="#e08b39" stroke-width="2.3" stroke-linecap="round"/></svg>`}
+function weaponIcon(type){return type==='laser'?
+ `<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="#edfaff" stroke="#8fc9db" stroke-width="1.1"><rect x="6" y="5" width="6" height="22" rx="1.5"/><rect x="14" y="5" width="6" height="22" rx="1.5"/><rect x="22" y="5" width="6" height="22" rx="1.5"/></g><path d="M1.5 16H30.5" stroke="#16add6" stroke-width="4.2" stroke-linecap="round"/><path d="M1.5 16H30.5" stroke="#f7feff" stroke-width="1.6" stroke-linecap="round"/><circle cx="30" cy="16" r="2" fill="#4bd8ff"/></svg>`:
+ `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 16H12" stroke="#dfa264" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3 2"/><path d="M10 12.7h7a4.3 4.3 0 0 1 0 6.6h-7Z" fill="#c17d3e" stroke="#8f582b" stroke-width="1"/><path d="M12 14h4" stroke="#ffe3bd" stroke-width="1.2" stroke-linecap="round"/><rect x="24" y="7" width="3" height="18" rx="1.2" fill="#b9d0d4" stroke="#789da3" stroke-width=".8"/><path d="M20 8l1.3 3M20 24l1.3-3M28.5 11l1.7-2M28.5 21l1.7 2" stroke="#e6ae72" stroke-width="1.5" stroke-linecap="round"/></svg>`}
 function hud(){const l=getLevel();$('count').textContent=String(stage+1).padStart(2,'0')+' / '+LEVELS.length;const ch=stage<15?'01 / 導入':stage<35?'02 / 一手先':stage<55?'03 / 立体の形':stage<80?'04 / 三手設計':'05 / 応用試験';$('chapter').textContent=ch;$('title').textContent=l.title;
  $('subtitle').textContent=stage===0?'シアンのレーザーは、一直線に貫通する。':stage===1?'オレンジのショットは、手前の一個だけ。':'黒むらさきのバイキンを消して、白いともだちは守ろう。';$('progress').style.width=(100*(stage+1)/LEVELS.length)+'%';$('prev').disabled=stage===0;$('next').disabled=stage>=highest;
  $('loadout').innerHTML=l.weapons.map((type,i)=>`<button class="weapon ${type} ${i===selected?'selected':''} ${aims[i]?'done':''}" data-i="${i}" aria-label="${i+1}発目 ${type==='laser'?'レーザー貫通':'ショット単発'} ${aims[i]?'照準済':'未設定'}" ${shotsDone?'disabled':''}><span class="weapon-num">${i+1}</span><span class="weapon-icon">${weaponIcon(type)}</span><span class="weapon-mark">${aims[i]?'●':i===selected?'○':' '}</span></button>`).join('');
@@ -492,7 +508,22 @@ function planFire(){
 
 canvas.addEventListener('pointerdown',e=>{ensureAudio();pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>5)pointer.moved=true;if(pointer.moved){targetView=null;rawYaw+=dx*.0125;rawPitch-=dy*.0115;const SNAP=Math.PI/15;const iy=Math.round(rawYaw/SNAP),ip=Math.round(rawPitch/SNAP);if(iy!==lastTickYaw||ip!==lastTickPitch){lastTickYaw=iy;lastTickPitch=ip;const now=performance.now();if(now-lastRotSound>31){lastRotSound=now;soundRotate((iy%6===0)||(ip%6===0));}}}});
-canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.moved&&!shotsDone){const r=canvas.getBoundingClientRect(),a=nearestFace(e.clientX-r.left,e.clientY-r.top);if(a)setAim(selected,a)}pointer=null});canvas.addEventListener('pointercancel',()=>pointer=null);
+function tapAim(aim){
+ if(shotsDone||!aim)return;
+ // The same cell always cancels the already placed aim, even after auto-advancing.
+ let existing=isSameAim(aims[selected],aim)?selected:-1;
+ if(existing<0){for(let i=aims.length-1;i>=0;i--){if(isSameAim(aims[i],aim)){existing=i;break}}}
+ if(existing>=0){aims[existing]=null;selected=existing;aimPulse.aim=null;tapSound();hud();return}
+ setAim(selected,aim);
+}
+function aimAtTap(x,y){
+ // Aiming on the block OR directly tapping its numbered corner badge both cancel it.
+ for(let i=aims.length-1;i>=0;i--){const a=aims[i];if(!a||camera()[a.axis]*a.sign<=.05)continue;
+  const p=aimCornerPoint(a);if(Math.hypot(x-p.x,y-p.y)<=14)return a;
+ }
+ return nearestFace(x,y);
+}
+canvas.addEventListener('pointerup',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.moved&&!shotsDone){const r=canvas.getBoundingClientRect(),a=aimAtTap(e.clientX-r.left,e.clientY-r.top);if(a)tapAim(a)}pointer=null});canvas.addEventListener('pointercancel',()=>pointer=null);
 $('loadout').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b||shotsDone)return;const i=Number(b.dataset.i);if(i===selected&&aims[i]){aims[i]=null;tapSound();hud();return}setSelected(i)});
 $('fireBtn').addEventListener('click',planFire);
 $('resetBtn').addEventListener('click',()=>{if(shotsDone){shotSeq++;shotsDone=false;settled=false;success=false;report=null;arena.classList.remove('firing','impact');hud()}else if(aims[selected]){aims[selected]=null;aimPulse.aim=null;hud();tapSound()}else{aims=getLevel().weapons.map(()=>null);selected=0;aimPulse.aim=null;hud();tapSound()}});
@@ -502,7 +533,7 @@ $('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;save();soundHud();i
 $('prev').addEventListener('click',()=>{if(stage>0)show(stage-1)});$('next').addEventListener('click',()=>{if(stage<highest)show(stage+1)});
 window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(arena);document.addEventListener('visibilitychange',()=>{if(document.hidden)pointer=null});
 show(Math.min(stage,highest));soundHud();requestAnimationFrame(draw);
-window.LASER_CUBE={LEVELS,show,evaluate,setAim,get aims(){return aims},get selected(){return selected},get stage(){return stage},get hitAreas(){return hitAreas},get camera(){return {yaw,pitch,rawYaw,rawPitch}},orbit(dx,dy){rawYaw+=dx;rawPitch+=dy},fire:planFire,get report(){return report},get settled(){return settled},get success(){return success},get shotsDone(){return shotsDone},get soundOn(){return soundOn}};
+window.LASER_CUBE={LEVELS,show,evaluate,setAim,tapAim,get aims(){return aims},get selected(){return selected},get stage(){return stage},get hitAreas(){return hitAreas},get camera(){return {yaw,pitch,rawYaw,rawPitch}},orbit(dx,dy){rawYaw+=dx;rawPitch+=dy},fire:planFire,get report(){return report},get settled(){return settled},get success(){return success},get shotsDone(){return shotsDone},get soundOn(){return soundOn}};
 })();
 </script>
 </body></html>
