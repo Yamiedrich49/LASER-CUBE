@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1">
 <meta name="theme-color" content="#f6f9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>LASER CUBE — CUBE CREATURES v14</title>
+<title>LASER CUBE — CUBE CREATURES v15</title>
 <style>
 :root{--bg:#f7f9f8;--ink:#193941;--mute:#7c9498;--mint:#239bc0;--mint-light:#d8f4ff;--warm:#db8737;--line:#dbe7e8;--virus:#4b395e;--ally:#ffffff;--ally-line:#a7bec0;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -354,11 +354,75 @@ function drawCubes(timing){
  }
 }
 function beamGradient(a,b,outer,inner,opacity=1){
+ if(opacity<=.005)return;
  ctx.save();ctx.globalAlpha=opacity;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
  ctx.strokeStyle=outer;ctx.lineWidth=9;ctx.shadowBlur=17;ctx.shadowColor=outer;ctx.globalAlpha=opacity*.32;ctx.stroke();
  ctx.shadowBlur=0;ctx.globalAlpha=opacity*.97;ctx.strokeStyle=outer;ctx.lineWidth=3.0;ctx.stroke();
  ctx.strokeStyle=inner;ctx.lineWidth=1.55;ctx.stroke();ctx.restore();
+}
+const lerp3=(a,b,t)=>a.map((v,i)=>mix(v,b[i],t));
+function shotTrajectory(step){
+ const aim=step.aim,ax=aim.axis;
+ const from=faceP(aim,1.03);
+ const first=step.hits[0];
+ const to=first?origin(first.split(',').map(Number)).map((v,i)=>i===ax?v+aim.sign*.49:v)
+               :faceP({...aim,sign:-aim.sign},.50);
+ return {from,to};
+}
+// A parallel ray from any projectile position toward the viewer determines
+// whether a different cube is physically in front of it. The world direction
+// remains correct even when the player turns the board during a shot.
+function projectileVisible(pos,step,progress){
+ const dir=camera(),l=getLevel(),before=report?.snapshots[Math.min(report.steps.indexOf(step),report.steps.length)];
+ if(!before)return true;
+ const blocks=[...l.blue,...l.gold];
+ for(const cell of blocks){
+  const id=key(cell);if(!before.has(id))continue;
+  if(step?.broken.includes(id)&&cubeState(step,id,progress).opacity<.20)continue;
+  const ctr=origin(cell);let near=-Infinity,far=Infinity,miss=false;
+  for(let axis=0;axis<3;axis++){
+   const low=ctr[axis]-.487-pos[axis],high=ctr[axis]+.487-pos[axis];
+   if(Math.abs(dir[axis])<1e-6){if(low>0||high<0){miss=true;break;}continue;}
+   const t0=low/dir[axis],t1=high/dir[axis];
+   near=Math.max(near,Math.min(t0,t1));far=Math.min(far,Math.max(t0,t1));
+   if(near>far){miss=true;break;}
+  }
+  // t > .04 is a surface strictly closer to the viewer, not self-contact.
+  if(!miss&&far>.045&&near<far&&far>Math.max(near,.045))return false;
+ }
+ return true;
+}
+function drawDepthCorrectRay(from,to,step,progress,endProgress){
+ const N=36;
+ let prev=from,lastVis=null,startSeg=null;
+ const finish=(curr,vis)=>{
+  if(startSeg){beamGradient(project(startSeg),project(curr),'#28bddd','#f5ffff',vis?endProgress:endProgress*.13);}
+ };
+ for(let i=1;i<=N;i++){
+  const curr=lerp3(from,to,i/N);
+  const mid=lerp3(prev,curr,.5);
+  const visible=projectileVisible(mid,step,progress);
+  if(startSeg===null){startSeg=prev;lastVis=visible;}
+  if(visible!==lastVis){finish(prev,lastVis);startSeg=prev;lastVis=visible;}
+  if(i===N)finish(curr,lastVis);
+  prev=curr;
+ }
+}
+function drawShotBody(p,from,to){
+ const pFrom=project(from),pTo=project(to),screenVector={x:pTo.x-pFrom.x,y:pTo.y-pFrom.y};
+ const total3=Math.hypot(...to.map((v,i)=>v-from[i]));
+ const amount=total3>1e-6?Math.min(1,Math.hypot(screenVector.x,screenVector.y)/(scale*total3)):0;
+ const angle=Math.atan2(screenVector.y,screenVector.x);
+ const zoom=clamp(1+(project(p).depth-pFrom.depth)*.035,.78,1.18);
+ const len=zoom*(3.1+6.5*amount),radius=zoom*4.2;
+ const point=project(p);
+ ctx.save();ctx.translate(point.x,point.y);ctx.rotate(angle);
+ ctx.shadowColor='#d89c65';ctx.shadowBlur=8;
+ ctx.fillStyle='#9b612f';ctx.strokeStyle='#fff0d2';ctx.lineWidth=1.05;
+ ctx.beginPath();ctx.ellipse(0,0,len,radius,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.stroke();
+ ctx.fillStyle='#ffe4bc';ctx.beginPath();ctx.ellipse(-len*.22,-radius*.25,len*.48,1.05,-.05,0,Math.PI*2);ctx.fill();
+ ctx.restore();
 }
 function drawRay(now,t){
  const l=getLevel();if(!shotsDone){
@@ -367,50 +431,40 @@ function drawRay(now,t){
   });return;
  }
  if(!report||t.i<0||t.i>=l.weapons.length)return;
- const s=report.steps[t.i],aim=s.aim,type=s.type,ax=aim.axis;
- const startPr=project(faceP(aim,1.03));
- if(type==='laser'){
-  const endPr=project(faceP({...aim,sign:-aim.sign},.54));
+ const step=report.steps[t.i],aim=step.aim;
+ const {from,to}=shotTrajectory(step);
+ if(step.type==='laser'){
+  // The end point follows an axial world-space line. Orthographic projection
+  // remains exact at any yaw/pitch; attenuation encodes 3-D occlusion.
+  const far=faceP({...aim,sign:-aim.sign},.54);
   const travel=smooth((t.progress-.064)/.31);
   const hold=clamp((.80-t.progress)/.22,0,1);
   if(travel<=0||hold<=0)return;
-  const point={x:mix(startPr.x,endPr.x,travel),y:mix(startPr.y,endPr.y,travel)};
-  beamGradient(startPr,point,'#28bddd','#f5ffff',hold);
-  ctx.save();ctx.shadowBlur=19;ctx.shadowColor='#49d5ff';
-  circle(point,4.8,'#effdff',hold);ctx.restore();
-  for(let j=0;j<3;j++){
-   const u=Math.max(0,travel-j*.15),v=Math.max(0,u-.08);
-   const a={x:mix(startPr.x,endPr.x,v),y:mix(startPr.y,endPr.y,v)};
-   const b={x:mix(startPr.x,endPr.x,u),y:mix(startPr.y,endPr.y,u)};
-   stroke(a,b,'#f0ffff',1.2,hold*.80);
+  const tip=lerp3(from,far,travel);
+  drawDepthCorrectRay(from,tip,step,t.progress,hold);
+  if(projectileVisible(tip,step,t.progress)){
+   const point=project(tip);
+   ctx.save();ctx.shadowBlur=16;ctx.shadowColor='#49d5ff';circle(point,4.6,'#effdff',hold);ctx.restore();
   }
  }else{
-  const hit=s.hits[0];const pos=hit?origin(hit.split(',').map(Number)):faceP({...aim,sign:-aim.sign},.5);
-  const dest=hit?pos.map((v,j)=>j===ax?v+aim.sign*.49:v):pos;
-  const endPr=project(dest),f=smooth((t.progress-.07)/.37);
+  const hit=step.hits[0],f=smooth((t.progress-.07)/.37);
   if(f>0&&f<1){
-   const tip={x:mix(startPr.x,endPr.x,f),y:mix(startPr.y,endPr.y,f)};
-   const prev={x:mix(startPr.x,endPr.x,Math.max(0,f-.15)),y:mix(startPr.y,endPr.y,Math.max(0,f-.15))};
-   stroke(prev,tip,'#e1ad77',3.1,.50);
-   const angle=Math.atan2(endPr.y-startPr.y,endPr.x-startPr.x);
-   ctx.save();ctx.translate(tip.x,tip.y);ctx.rotate(angle);
-   ctx.fillStyle='#aa662e';ctx.strokeStyle='#ffe0a4';ctx.lineWidth=1;
-   ctx.beginPath();ctx.moveTo(-9,-4.4);ctx.lineTo(2,-4.4);ctx.quadraticCurveTo(9,0,2,4.4);
-   ctx.lineTo(-9,4.4);ctx.closePath();ctx.fill();ctx.stroke();
-   ctx.fillStyle='#ffe4bc';ctx.fillRect(-6,-2.5,6,1.5);ctx.restore();
+   const pos=lerp3(from,to,f);
+   if(projectileVisible(pos,step,t.progress)){
+    const prior=lerp3(from,to,Math.max(0,f-.10));
+    stroke(project(prior),project(pos),'#e1ad77',2.3,.43);
+    drawShotBody(pos,from,to);
+   }
   }
-  if(f>=.99&&t.progress<.79&&hit){
-   const age=clamp((t.progress-.445)/.345,0,1);
-   const fade=1-age;
+  if(f>=.99&&t.progress<.79&&hit&&projectileVisible(to,step,t.progress)){
+   const endPr=project(to),age=clamp((t.progress-.445)/.345,0,1),fade=1-age;
    circle(endPr,7+36*age,null,fade*.7,'#d88f47',2.4);
    circle(endPr,3+21*age,null,fade*.48,'#f1c99c',1.3);
-   ctx.save();ctx.globalAlpha=Math.max(0,1-age);ctx.lineWidth=2;ctx.strokeStyle='#fff1d7';
    for(let i=0;i<8;i++){
     const a=i*TAU/8+.21,r=12+19*age;
     stroke({x:endPr.x+Math.cos(a)*r*.47,y:endPr.y+Math.sin(a)*r*.47},
       {x:endPr.x+Math.cos(a)*r,y:endPr.y+Math.sin(a)*r},'#f3b875',1.9,fade);
    }
-   ctx.restore();
   }
  }
 }
@@ -530,7 +584,7 @@ function planFire(){
 }
 
 canvas.addEventListener('pointerdown',e=>{if(e.cancelable)e.preventDefault();ensureAudio();pointer={id:e.pointerId,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId)});
-canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(e.cancelable)e.preventDefault();const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>5)pointer.moved=true;if(pointer.moved){targetView=null;rawYaw+=dx*.0125;rawPitch-=dy*.0115;const SNAP=Math.PI/15;const iy=Math.round(rawYaw/SNAP),ip=Math.round(rawPitch/SNAP);if(iy!==lastTickYaw||ip!==lastTickPitch){lastTickYaw=iy;lastTickPitch=ip;const now=performance.now();if(now-lastRotSound>31){lastRotSound=now;soundRotate((iy%6===0)||(ip%6===0));}}}});
+canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(e.cancelable)e.preventDefault();const dx=e.clientX-pointer.px,dy=e.clientY-pointer.py;pointer.px=e.clientX;pointer.py=e.clientY;if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>5)pointer.moved=true;if(pointer.moved){targetView=null;rawYaw-=dx*.0125;rawPitch+=dy*.0115;const SNAP=Math.PI/15;const iy=Math.round(rawYaw/SNAP),ip=Math.round(rawPitch/SNAP);if(iy!==lastTickYaw||ip!==lastTickPitch){lastTickYaw=iy;lastTickPitch=ip;const now=performance.now();if(now-lastRotSound>31){lastRotSound=now;soundRotate((iy%6===0)||(ip%6===0));}}}});
 function tapAim(aim){
  if(shotsDone||!aim)return;
  // The same cell always cancels the already placed aim, even after auto-advancing.
@@ -561,7 +615,7 @@ $('soundBtn').addEventListener('click',()=>{soundOn=!soundOn;save();soundHud();i
 $('prev').addEventListener('click',()=>{if(stage>0)show(stage-1)});$('next').addEventListener('click',()=>{if(stage<highest)show(stage+1)});
 window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(arena);document.addEventListener('visibilitychange',()=>{if(document.hidden)pointer=null});
 show(Math.min(stage,highest));soundHud();requestAnimationFrame(draw);
-window.LASER_CUBE={LEVELS,show,evaluate,setAim,tapAim,get aims(){return aims},get selected(){return selected},get stage(){return stage},get hitAreas(){return hitAreas},get camera(){return {yaw,pitch,rawYaw,rawPitch}},orbit(dx,dy){rawYaw+=dx;rawPitch+=dy},fire:planFire,get report(){return report},get settled(){return settled},get success(){return success},get shotsDone(){return shotsDone},get soundOn(){return soundOn}};
+window.LASER_CUBE={LEVELS,show,evaluate,setAim,tapAim,project,faceP,shotTrajectory,projectileVisible,get aims(){return aims},get selected(){return selected},get stage(){return stage},get hitAreas(){return hitAreas},get camera(){return {yaw,pitch,rawYaw,rawPitch}},orbit(dx,dy){rawYaw+=dx;rawPitch+=dy},fire:planFire,get report(){return report},get settled(){return settled},get success(){return success},get shotsDone(){return shotsDone},get soundOn(){return soundOn}};
 })();
 </script>
 </body></html>
